@@ -1,4 +1,4 @@
-package me.jamino.wowkeybindhelper.config;
+package me.jamino.wynnkeybindhelper.config;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -21,7 +21,7 @@ public final class ClothConfigScreen {
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.translatable("wowkeybindhelper.config.title"))
+                .setTitle(Component.translatable("wynnkeybindhelper.config.title"))
                 .setSavingRunnable(BarConfig::save);
         ConfigEntryBuilder entries = builder.entryBuilder();
 
@@ -90,7 +90,7 @@ public final class ClothConfigScreen {
         ConfigCategory bar = builder.getOrCreateCategory(Component.literal("Bottom Bar"));
         bar.addEntry(entries.startTextDescription(Component.literal(
                 "Pick what goes on the bar. It shows the first ones that fit, in this order;"
-                        + " reorder or add keybinds in config/wowkeybindhelper.json.")).build());
+                        + " reorder or add keybinds in config/wynnkeybindhelper.json.")).build());
         ConfigCategory items = builder.getOrCreateCategory(Component.literal("Item Actions"));
         items.addEntry(entries.startTextDescription(Component.literal(
                 "Pick what the bar shows while you hover an item (dynamic mode). Unpicked actions"

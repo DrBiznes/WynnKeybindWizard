@@ -1,4 +1,4 @@
-package me.jamino.wowkeybindhelper.render;
+package me.jamino.wynnkeybindhelper.render;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Locale;

@@ -1,7 +1,7 @@
-package me.jamino.wowkeybindhelper;
+package me.jamino.wynnkeybindhelper;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.jamino.wowkeybindhelper.config.BarConfig;
+import me.jamino.wynnkeybindhelper.config.BarConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -18,8 +18,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WowKeybindHelper implements ClientModInitializer {
-    public static final String MOD_ID = "wowkeybindhelper";
+public final class WynnKeybindHelper implements ClientModInitializer {
+    public static final String MOD_ID = "wynnkeybindhelper";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static KeyMapping openKey;
@@ -34,7 +34,7 @@ public final class WowKeybindHelper implements ClientModInitializer {
         BarConfig.refresh();
 
         openKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.wowkeybindhelper.all_keybinds", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y,
+                "key.wynnkeybindhelper.all_keybinds", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y,
                 KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"))));
 
         // The popup only opens from inventory screens; in the world the key does nothing.
@@ -58,7 +58,7 @@ public final class WowKeybindHelper implements ClientModInitializer {
                 KeybindPanel.scrollBy(vertical);
                 return false;
             });
-            ScreenKeyboardEvents.allowKeyPress(screen).register(WowKeybindHelper::allowKey);
+            ScreenKeyboardEvents.allowKeyPress(screen).register(WynnKeybindHelper::allowKey);
         });
     }
 

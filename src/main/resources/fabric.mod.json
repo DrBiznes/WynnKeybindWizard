@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "wowkeybindhelper",
+  "id": "wynnkeybindhelper",
   "version": "${version}",
-  "name": "WoW Keybind Helper",
+  "name": "Wynn Keybind Helper",
   "description": "A live bar of key prompts under the inventory for the World of Wynncraft modpack.",
   "authors": ["DrBiznes"],
   "license": "All-Rights-Reserved",
   "environment": "client",
   "entrypoints": {
-    "client": ["me.jamino.wowkeybindhelper.WowKeybindHelper"],
-    "modmenu": ["me.jamino.wowkeybindhelper.config.ModMenuIntegration"]
+    "client": ["me.jamino.wynnkeybindhelper.WynnKeybindHelper"],
+    "modmenu": ["me.jamino.wynnkeybindhelper.config.ModMenuIntegration"]
   },
-  "mixins": ["wowkeybindhelper.mixins.json"],
+  "mixins": ["wynnkeybindhelper.mixins.json"],
   "depends": {
     "java": ">=21",
     "minecraft": ">=${minecraft_version}",

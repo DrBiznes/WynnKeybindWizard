@@ -20,7 +20,7 @@ repositories {
 fabricApi {
 	configureTests {
 		createSourceSet = true
-		modId = "wowkeybindhelper-test"
+		modId = "wynnkeybindhelper-test"
 		enableGameTests = false
 		enableClientGameTests = true
 		eula = true

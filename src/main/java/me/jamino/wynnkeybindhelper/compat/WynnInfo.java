@@ -1,7 +1,7 @@
-package me.jamino.wowkeybindhelper.compat;
+package me.jamino.wynnkeybindhelper.compat;
 
 import java.util.function.Supplier;
-import me.jamino.wowkeybindhelper.WowKeybindHelper;
+import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.item.ItemStack;
 
@@ -51,7 +51,7 @@ public final class WynnInfo {
         } catch (Throwable t) {
             // A Wynntils update moved something. Stop asking for the rest of the session.
             available = false;
-            WowKeybindHelper.LOGGER.warn("Wynntils lookup failed; class, mount and item awareness are off", t);
+            WynnKeybindHelper.LOGGER.warn("Wynntils lookup failed; class, mount and item awareness are off", t);
             return unknown;
         }
     }

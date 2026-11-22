@@ -1,4 +1,4 @@
-# WoW Keybind Helper
+# Wynn Keybind Helper
 
 Live key prompts around the inventory, for the World of Wynncraft modpack (Fabric 1.21.11).
 Not published on its own.
@@ -19,7 +19,7 @@ Not published on its own.
 
 ## Configuring
 
-`config/wowkeybindhelper.json` is written on first launch and re-read every time a container screen
+`config/wynnkeybindhelper.json` is written on first launch and re-read every time a container screen
 opens, so edits apply without a restart. Ship it in the pack to set the layout. With Cloth Config
 and Mod Menu installed (both optional) the same settings, and which keybinds go on the bar, can be
 changed in game; adding new keybind entries is done in the file.
@@ -38,7 +38,7 @@ An entry whose keybind does not exist (mod not installed) or is unbound is hidde
 
 ## Building and testing
 
-    gradlew build                 # build/libs/wowkeybindhelper-<version>.jar
+    gradlew build                 # build/libs/wynnkeybindhelper-<version>.jar
     gradlew runClientGameTest     # drives a real client, screenshots to build/run/clientGameTest/screenshots
 
 ## Porting to 26.x

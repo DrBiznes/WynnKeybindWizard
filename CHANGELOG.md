@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Renamed to **Wynn Keybind Helper**. The mod id is now `wynnkeybindhelper`, so the config file is
+  `config/wynnkeybindhelper.json` and the jar is `wynnkeybindhelper-<version>.jar`.
 - The Background switch is now a **Background opacity** slider (`backgroundOpacity`, 0-100). At 0
   the bars show just the keys with no box behind them.
 - Hovering an item now shows at most 5 actions (new `itemSlots` setting, "Item actions on the bar"
@@ -9,7 +11,7 @@
 - Screenshot and Mark to Compare no longer show on the bar while hovering an item. They are still
   in the All Keybinds popup.
 - Item actions now use `onBar` like other keybinds, and the settings screen has an Item Actions page
-  to pick them. Older config files are updated automatically when they load.
+  to pick them.
 - The All Keybinds popup now uses Wynntils' menu background, so resource packs that reskin Wynntils
   (like WynnEdits Dark Theme) reskin the popup too. Without Wynntils it keeps the old flat look.
 
@@ -47,4 +49,4 @@
 - Everything else on pages that cycle on their own. Hovering pauses them, and clicking or scrolling
   flips pages.
 - Item actions replace the page while an item is hovered.
-- Layout is set in `config/wowkeybindhelper.json`.
+- Layout is set in `config/wynnkeybindhelper.json`.

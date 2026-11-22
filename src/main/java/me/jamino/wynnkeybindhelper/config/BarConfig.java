@@ -1,4 +1,4 @@
-package me.jamino.wowkeybindhelper.config;
+package me.jamino.wynnkeybindhelper.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,11 +8,11 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
-import me.jamino.wowkeybindhelper.WowKeybindHelper;
+import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * config/wowkeybindhelper.json. The modpack ships this file; the defaults below are the
+ * config/wynnkeybindhelper.json. The modpack ships this file; the defaults below are the
  * World of Wynncraft layout and are written out on first launch. The optional Cloth Config
  * screen edits this same object and saves it back through {@link #save()}.
  *
@@ -22,7 +22,7 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class BarConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wowkeybindhelper.json");
+    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindhelper.json");
 
     /** Where the spell keys are shown on the inventory. They are always in the popup. */
     public enum SpellBar { TOP, BOTTOM, OFF }
@@ -167,7 +167,7 @@ public final class BarConfig {
             if (loaded != null) instance = loaded.sanitized();
         } catch (IOException | RuntimeException e) {
             // Bad JSON or an unreadable file: keep whatever was working before.
-            WowKeybindHelper.LOGGER.error("Could not load {}, keeping previous settings", PATH, e);
+            WynnKeybindHelper.LOGGER.error("Could not load {}, keeping previous settings", PATH, e);
         }
     }
 
@@ -177,7 +177,7 @@ public final class BarConfig {
             Files.writeString(PATH, GSON.toJson(instance.sanitized()));
             loadedAt = Files.getLastModifiedTime(PATH);
         } catch (IOException e) {
-            WowKeybindHelper.LOGGER.error("Could not save {}", PATH, e);
+            WynnKeybindHelper.LOGGER.error("Could not save {}", PATH, e);
         }
     }
 
@@ -192,43 +192,11 @@ public final class BarConfig {
             if (entry.keys == null) entry.keys = new ArrayList<>();
             entry.keys.removeIf(key -> key == null);
         }
-        mergeItemLock();
-        pickItemBar();
         if (spellBar == null) spellBar = SpellBar.TOP;
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);
         itemSlots = Math.clamp(itemSlots, 1, 12);
         backgroundOpacity = Math.clamp(backgroundOpacity, 0, 100);
         return this;
-    }
-
-    /**
-     * Before 0.4.0 every item action was offered on the bar and {@code onBar} meant nothing for
-     * them, so such files have it off everywhere. Turn it on for all of them except the stock
-     * Screenshot and Mark to Compare entries, matching the new defaults. Once any item action is
-     * on the bar this no longer applies.
-     */
-    private void pickItemBar() {
-        List<Entry> items = keybinds.stream().filter(Entry::isItemAction).toList();
-        if (items.isEmpty() || items.stream().anyMatch(entry -> entry.onBar)) return;
-        for (Entry entry : items) {
-            entry.onBar = !entry.keys.equals(List.of(SCREENSHOT_KEY)) && !entry.keys.equals(List.of(MARK_COMPARE_KEY));
-        }
-    }
-
-    /**
-     * Files written by 0.2.0 have a separate "Item Lock" entry on middle mouse next to "Lock Slot".
-     * Fold it into Lock Slot as its fallback key. Only the untouched 0.2.0 entry is matched, so a
-     * hand-made entry with another label or key is left alone.
-     */
-    private void mergeItemLock() {
-        boolean removed = keybinds.removeIf(entry -> "Item Lock".equals(entry.label)
-                && entry.keys.equals(List.of(LOCK_FALLBACK)));
-        if (!removed) return;
-        for (Entry entry : keybinds) {
-            if (entry.keys.contains("wynntils.keybind.lockSlot") && !entry.keys.contains(LOCK_FALLBACK)) {
-                entry.keys.add(LOCK_FALLBACK);
-            }
-        }
     }
 }

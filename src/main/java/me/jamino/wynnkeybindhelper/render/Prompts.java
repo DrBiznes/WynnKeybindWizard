@@ -1,11 +1,11 @@
-package me.jamino.wowkeybindhelper.render;
+package me.jamino.wynnkeybindhelper.render;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import java.util.HashMap;
 import java.util.Map;
-import me.jamino.wowkeybindhelper.compat.WynnInfo;
-import me.jamino.wowkeybindhelper.config.BarConfig;
+import me.jamino.wynnkeybindhelper.compat.WynnInfo;
+import me.jamino.wynnkeybindhelper.config.BarConfig;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

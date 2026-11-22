@@ -1,4 +1,4 @@
-package me.jamino.wowkeybindhelper.compat;
+package me.jamino.wynnkeybindhelper.compat;
 
 import com.wynntils.core.components.Models;
 import com.wynntils.models.character.type.ClassType;

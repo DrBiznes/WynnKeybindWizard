@@ -1,4 +1,4 @@
-package me.jamino.wowkeybindhelper.config;
+package me.jamino.wynnkeybindhelper.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

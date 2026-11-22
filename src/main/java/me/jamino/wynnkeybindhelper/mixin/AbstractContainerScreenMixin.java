@@ -1,7 +1,7 @@
-package me.jamino.wowkeybindhelper.mixin;
+package me.jamino.wynnkeybindhelper.mixin;
 
-import me.jamino.wowkeybindhelper.KeybindBar;
-import me.jamino.wowkeybindhelper.KeybindPanel;
+import me.jamino.wynnkeybindhelper.KeybindBar;
+import me.jamino.wynnkeybindhelper.KeybindPanel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
