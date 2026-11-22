@@ -128,6 +128,42 @@ public class InventoryBarTest implements FabricClientGameTest {
                 throw new AssertionError("Escape should close only the popup");
             }
 
+            // The mod switch asks first; Cancel and Escape both back out and keep the mod on.
+            context.getInput().pressKey(GLFW.GLFW_KEY_Y);
+            context.waitTicks(5);
+            clickAt(context, KeybindPanel::modToggleCenter);
+            if (!context.computeOnClient(mc -> KeybindPanel.isConfirming())) {
+                throw new AssertionError("mod switch did not ask for confirmation");
+            }
+            context.takeScreenshot("4c-popup-turn-off-confirm");
+            clickAt(context, () -> KeybindPanel.confirmButtonCenter(false));
+            if (context.computeOnClient(mc -> KeybindPanel.isConfirming() || !KeybindPanel.isOpen() || !BarConfig.get().enabled)) {
+                throw new AssertionError("Cancel should leave the popup open and the mod on");
+            }
+            clickAt(context, KeybindPanel::modToggleCenter);
+            context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+            context.waitTicks(5);
+            if (context.computeOnClient(mc -> KeybindPanel.isConfirming() || !KeybindPanel.isOpen() || !BarConfig.get().enabled)) {
+                throw new AssertionError("Escape should back out of the confirmation only");
+            }
+            // Turn off for real: popup closes, the hotkey stops working, and it sticks in the file.
+            clickAt(context, KeybindPanel::modToggleCenter);
+            clickAt(context, () -> KeybindPanel.confirmButtonCenter(true));
+            if (context.computeOnClient(mc -> KeybindPanel.isOpen() || BarConfig.get().enabled)) {
+                throw new AssertionError("Turn off did not switch the mod off");
+            }
+            context.getInput().pressKey(GLFW.GLFW_KEY_Y);
+            context.waitTicks(5);
+            if (KeybindPanel.isOpen()) throw new AssertionError("hotkey still opens the popup with the mod off");
+            context.takeScreenshot("4d-mod-turned-off");
+            try {
+                if (!Files.readString(CONFIG).contains("\"enabled\": false")) {
+                    throw new AssertionError("turning the mod off was not saved to the config");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             // Spells pinned to the bottom bar instead, dynamic mode off.
             context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
             context.waitTicks(5);
@@ -234,6 +270,19 @@ public class InventoryBarTest implements FabricClientGameTest {
             if (center == null) throw new AssertionError("spell switch is not visible in the popup");
             double scale = mc.getWindow().getGuiScale();
             return new double[] {center[0] * scale, center[1] * scale};
+        });
+        context.getInput().setCursorPos(pos[0], pos[1]);
+        context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+        context.waitTicks(5);
+    }
+
+    /** Clicks a point given in GUI coordinates, read on the client thread. */
+    private static void clickAt(ClientGameTestContext context, java.util.function.Supplier<double[]> where) {
+        double[] pos = context.computeOnClient(mc -> {
+            double[] gui = where.get();
+            if (gui == null) throw new AssertionError("click target is not showing");
+            double scale = mc.getWindow().getGuiScale();
+            return new double[] {gui[0] * scale, gui[1] * scale};
         });
         context.getInput().setCursorPos(pos[0], pos[1]);
         context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);

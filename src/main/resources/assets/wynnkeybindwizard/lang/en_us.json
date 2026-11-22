@@ -4,5 +4,10 @@
   "wynnkeybindwizard.all_keybinds": "All Keybinds",
   "wynnkeybindwizard.panel.title": "Keybinds",
   "wynnkeybindwizard.panel.show_spells": "Show on inventory",
+  "wynnkeybindwizard.panel.mod_enabled": "Keybind Wizard enabled",
+  "wynnkeybindwizard.panel.turn_off.title": "Turn off Keybind Wizard?",
+  "wynnkeybindwizard.panel.turn_off.body": "This hides the keybind bar and this popup, and the hotkey stops working.\nTo turn it back on you will have to edit the config again: set \"enabled\" to true in config/wynnkeybindwizard.json.",
+  "wynnkeybindwizard.panel.turn_off.confirm": "Turn off",
+  "wynnkeybindwizard.panel.turn_off.cancel": "Cancel",
   "wynnkeybindwizard.config.title": "Wynn Keybind Wizard"
 }

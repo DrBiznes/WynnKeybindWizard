@@ -62,6 +62,17 @@ public final class KeybindPanel {
     private static final int SWITCH_KNOB = 0xFFE8E2D6;
     private static final int TOGGLE_TEXT = 0x8C979E;
 
+    // The "mod enabled" switch along the bottom, and the confirmation it asks for before turning off.
+    private static final int FOOTER_GAP = 5;
+    private static final int CONFIRM_MAX_W = 220;
+    private static final int CONFIRM_LINE = 10;
+    private static final int BUTTON_H = 14;
+    private static final int BUTTON_GAP = 6;
+    private static final int PANEL_DIM = 0xB0000000;
+    private static final int BUTTON_DANGER = 0xFF8A2E2E;
+    private static final int BUTTON_PLAIN = 0xFF4A4448;
+    private static final int BUTTON_TEXT = 0xE8E2D6;
+
     private record Group(String title, List<Shown> items, boolean spellToggle) {
         int height() {
             return (spellToggle ? TOGGLE_HEIGHT : 0) + HEADER_HEIGHT + items.size() * ROW_HEIGHT;
@@ -69,7 +80,7 @@ public final class KeybindPanel {
 
         int width(Font font) {
             int w = font.width(title);
-            if (spellToggle) w = Math.max(w, toggleWidth(font));
+            if (spellToggle) w = Math.max(w, toggleWidth(font, spellLabel()));
             for (Shown item : items) w = Math.max(w, item.width());
             return w;
         }
@@ -81,6 +92,13 @@ public final class KeybindPanel {
     private static int x0, y0, x1, y1;
     /** Clickable area of the spell switch in screen coordinates; empty when it is scrolled out of view. */
     private static int tx0, ty0, tx1, ty1;
+    /** Clickable area of the mod switch. */
+    private static int mx0, my0, mx1, my1;
+    /** The turn-off confirmation is showing over the panel. */
+    private static boolean confirming;
+    /** The confirmation box and its two buttons, as last drawn. */
+    private static int cx0, cy0, cx1, cy1;
+    private static int okX0, okX1, cancelX0, cancelX1, buttonY0, buttonY1;
     /** Where the spells were before the switch turned them off, so turning it back on restores that. */
     private static BarConfig.SpellBar lastShown = BarConfig.SpellBar.TOP;
 
@@ -93,10 +111,23 @@ public final class KeybindPanel {
     public static void toggle() {
         open = !open;
         scroll = 0;
+        confirming = false;
     }
 
     public static void close() {
         open = false;
+        confirming = false;
+    }
+
+    /** Backs out of the turn-off confirmation if it is showing. Returns whether it was. */
+    public static boolean cancelConfirm() {
+        boolean was = confirming;
+        confirming = false;
+        return was;
+    }
+
+    public static boolean isConfirming() {
+        return confirming;
     }
 
     public static boolean contains(double x, double y) {
@@ -105,7 +136,34 @@ public final class KeybindPanel {
 
     /** Handles a click inside the panel. */
     public static void click(double x, double y) {
+        if (confirming) {
+            boolean onButtons = y >= buttonY0 && y < buttonY1;
+            if (onButtons && x >= okX0 && x < okX1) turnOff();
+            else if (onButtons && x >= cancelX0 && x < cancelX1) confirming = false;
+            // Anywhere else on the panel backs out too; inside the box itself does nothing.
+            else if (!(x >= cx0 && x < cx1 && y >= cy0 && y < cy1)) confirming = false;
+            return;
+        }
         if (x >= tx0 && x < tx1 && y >= ty0 && y < ty1) toggleSpellBar();
+        else if (x >= mx0 && x < mx1 && y >= my0 && y < my1) confirming = true;
+    }
+
+    /** Center of the mod switch in GUI coordinates as last drawn. For tests. */
+    public static double[] modToggleCenter() {
+        return new double[] {mx0 + 1 + SWITCH_W / 2.0, (my0 + my1) / 2.0};
+    }
+
+    /** Center of the confirmation's Turn off (true) or Cancel (false) button, or null if it isn't showing. For tests. */
+    public static double[] confirmButtonCenter(boolean turnOff) {
+        if (!confirming) return null;
+        return new double[] {turnOff ? (okX0 + okX1) / 2.0 : (cancelX0 + cancelX1) / 2.0, (buttonY0 + buttonY1) / 2.0};
+    }
+
+    /** Switches the whole mod off. Only an edit to the config (file or settings screen) turns it back on. */
+    private static void turnOff() {
+        BarConfig.get().enabled = false;
+        BarConfig.save();
+        close();
     }
 
     /** Center of the spell switch in GUI coordinates as last drawn, or null if it isn't visible. For tests. */
@@ -125,15 +183,24 @@ public final class KeybindPanel {
         BarConfig.save();
     }
 
-    private static String toggleLabel() {
-        return Component.translatable("wynnkeybindwizard.panel.show_spells").getString();
+    private static String spellLabel() {
+        return tr("show_spells");
     }
 
-    private static int toggleWidth(Font font) {
-        return SWITCH_W + SWITCH_GAP + Math.round(font.width(toggleLabel()) * TOGGLE_TEXT_SCALE);
+    private static String modLabel() {
+        return tr("mod_enabled");
+    }
+
+    private static String tr(String key) {
+        return Component.translatable("wynnkeybindwizard.panel." + key).getString();
+    }
+
+    private static int toggleWidth(Font font, String label) {
+        return SWITCH_W + SWITCH_GAP + Math.round(font.width(label) * TOGGLE_TEXT_SCALE);
     }
 
     public static void scrollBy(double wheel) {
+        if (confirming) return;
         scroll = Math.clamp(scroll - (int) Math.signum(wheel) * SCROLL_STEP, 0, maxScroll);
     }
 
@@ -168,7 +235,8 @@ public final class KeybindPanel {
             contentHeight = Math.max(contentHeight, filled - GROUP_GAP);
         }
 
-        int viewHeight = Math.min(contentHeight, screenHeight - SCREEN_MARGIN * 2 - TITLE_HEIGHT - PAD * 2);
+        int footerHeight = FOOTER_GAP + SWITCH_H;
+        int viewHeight = Math.min(contentHeight, screenHeight - SCREEN_MARGIN * 2 - TITLE_HEIGHT - footerHeight - PAD * 2);
         // Each column is only as wide as its own contents, so one long label doesn't stretch them all.
         int[] widths = new int[columns.size()];
         int width = Math.max(0, columns.size() - 1) * COLUMN_GAP + PAD * 2;
@@ -177,7 +245,8 @@ public final class KeybindPanel {
             width += widths[i];
         }
         width = Math.max(width, font.width(title()) + PAD * 2);
-        int height = TITLE_HEIGHT + viewHeight + PAD * 2;
+        width = Math.max(width, toggleWidth(font, modLabel()) + PAD * 2);
+        int height = TITLE_HEIGHT + viewHeight + footerHeight + PAD * 2;
         x0 = (screenWidth - width) / 2;
         y0 = (screenHeight - height) / 2;
         x1 = x0 + width;
@@ -189,14 +258,7 @@ public final class KeybindPanel {
             KeyPromptRenderer.raise(g);
             KeyPromptRenderer.rect(g, 0, 0, screenWidth, screenHeight, DIM);
         }
-        if (KeyPromptRenderer.exists(WYNNTILS_BACKGROUND)) {
-            KeyPromptRenderer.nineSlice(g, WYNNTILS_BACKGROUND, BG_TEX_W, BG_TEX_H, BG_BORDER, x0, y0, x1, y1);
-        } else {
-            KeyPromptRenderer.rect(g, x0 + 1, y0, x1 - 1, y1, BORDER);
-            KeyPromptRenderer.rect(g, x0, y0 + 1, x1, y1 - 1, BORDER);
-            KeyPromptRenderer.rect(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, BORDER_LIGHT);
-            KeyPromptRenderer.rect(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, FILL);
-        }
+        background(g, x0, y0, x1, y1);
 
         String title = title();
         KeyPromptRenderer.text(g, font, title, (screenWidth - font.width(title)) / 2, y0 + PAD - 1, TITLE_COLOR, 255);
@@ -210,13 +272,13 @@ public final class KeybindPanel {
             int y = top - scroll;
             for (Group group : column) {
                 if (group.spellToggle) {
-                    drawToggle(g, font, x, y);
+                    drawToggle(g, font, x, y, BarConfig.get().spellBar != BarConfig.SpellBar.OFF, spellLabel());
                     // Only clickable where it is actually visible inside the scroll view.
                     int visTop = Math.max(y, top), visBottom = Math.min(y + SWITCH_H + 1, top + viewHeight);
                     if (visTop < visBottom) {
                         tx0 = x - 1;
                         ty0 = visTop - 1;
-                        tx1 = x + toggleWidth(font) + 1;
+                        tx1 = x + toggleWidth(font, spellLabel()) + 1;
                         ty1 = visBottom + 1;
                     }
                     y += TOGGLE_HEIGHT;
@@ -238,10 +300,88 @@ public final class KeybindPanel {
             int thumbY = top + (viewHeight - thumb) * scroll / maxScroll;
             KeyPromptRenderer.rect(g, x1 - 5, thumbY, x1 - 4, thumbY + thumb, SCROLLBAR);
         }
+
+        int footerY = top + viewHeight + FOOTER_GAP;
+        drawToggle(g, font, x0 + PAD, footerY, BarConfig.get().enabled, modLabel());
+        mx0 = x0 + PAD - 1;
+        my0 = footerY - 1;
+        mx1 = x0 + PAD + toggleWidth(font, modLabel()) + 1;
+        my1 = footerY + SWITCH_H + 1;
+
+        if (confirming) drawConfirm(g, font, screenWidth, screenHeight);
     }
 
-    private static void drawToggle(GuiGraphics g, Font font, int x, int y) {
-        boolean on = BarConfig.get().spellBar != BarConfig.SpellBar.OFF;
+    private static void background(GuiGraphics g, int x0, int y0, int x1, int y1) {
+        if (KeyPromptRenderer.exists(WYNNTILS_BACKGROUND)) {
+            KeyPromptRenderer.nineSlice(g, WYNNTILS_BACKGROUND, BG_TEX_W, BG_TEX_H, BG_BORDER, x0, y0, x1, y1);
+        } else {
+            KeyPromptRenderer.rect(g, x0 + 1, y0, x1 - 1, y1, BORDER);
+            KeyPromptRenderer.rect(g, x0, y0 + 1, x1, y1 - 1, BORDER);
+            KeyPromptRenderer.rect(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, BORDER_LIGHT);
+            KeyPromptRenderer.rect(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, FILL);
+        }
+    }
+
+    /** "Turn off Keybind Wizard?" box over the panel, saying the config is the only way back. */
+    private static void drawConfirm(GuiGraphics g, Font font, int screenWidth, int screenHeight) {
+        int width = Math.min(CONFIRM_MAX_W, screenWidth - SCREEN_MARGIN * 2);
+        int inner = width - PAD * 2;
+        String title = tr("turn_off.title");
+        List<String> body = wrap(font, tr("turn_off.body"), inner);
+        int height = PAD + TITLE_HEIGHT + body.size() * CONFIRM_LINE + BUTTON_GAP + BUTTON_H + PAD;
+
+        KeyPromptRenderer.rect(g, x0, y0, x1, y1, PANEL_DIM);
+        cx0 = (screenWidth - width) / 2;
+        cy0 = (screenHeight - height) / 2;
+        cx1 = cx0 + width;
+        cy1 = cy0 + height;
+        background(g, cx0, cy0, cx1, cy1);
+
+        KeyPromptRenderer.text(g, font, title, (screenWidth - font.width(title)) / 2, cy0 + PAD - 1, TITLE_COLOR, 255);
+        int y = cy0 + PAD + TITLE_HEIGHT;
+        for (String line : body) {
+            KeyPromptRenderer.text(g, font, line, cx0 + PAD, y, HEADER_COLOR, 255);
+            y += CONFIRM_LINE;
+        }
+
+        buttonY0 = y + BUTTON_GAP;
+        buttonY1 = buttonY0 + BUTTON_H;
+        int buttonW = (inner - BUTTON_GAP) / 2;
+        okX0 = cx0 + PAD;
+        okX1 = okX0 + buttonW;
+        cancelX1 = cx1 - PAD;
+        cancelX0 = cancelX1 - buttonW;
+        drawButton(g, font, okX0, okX1, tr("turn_off.confirm"), BUTTON_DANGER);
+        drawButton(g, font, cancelX0, cancelX1, tr("turn_off.cancel"), BUTTON_PLAIN);
+    }
+
+    private static void drawButton(GuiGraphics g, Font font, int bx0, int bx1, String label, int fill) {
+        KeyPromptRenderer.rect(g, bx0 + 1, buttonY0, bx1 - 1, buttonY1, fill);
+        KeyPromptRenderer.rect(g, bx0, buttonY0 + 1, bx1, buttonY1 - 1, fill);
+        int textY = buttonY0 + (BUTTON_H - font.lineHeight) / 2 + 1;
+        KeyPromptRenderer.text(g, font, label, (bx0 + bx1 - font.width(label)) / 2, textY, BUTTON_TEXT, 255);
+    }
+
+    /** Word-wraps to {@code width}; a newline in the text starts a new paragraph. */
+    private static List<String> wrap(Font font, String text, int width) {
+        List<String> lines = new ArrayList<>();
+        for (String paragraph : text.split("\n")) {
+            String line = "";
+            for (String word : paragraph.split(" ")) {
+                String next = line.isEmpty() ? word : line + " " + word;
+                if (!line.isEmpty() && font.width(next) > width) {
+                    lines.add(line);
+                    line = word;
+                } else {
+                    line = next;
+                }
+            }
+            lines.add(line);
+        }
+        return lines;
+    }
+
+    private static void drawToggle(GuiGraphics g, Font font, int x, int y, boolean on, String label) {
         // A rounded-off pill: the track minus its corners, with a square knob at one end.
         KeyPromptRenderer.rect(g, x + 1, y, x + SWITCH_W - 1, y + SWITCH_H, on ? SWITCH_ON : SWITCH_OFF);
         KeyPromptRenderer.rect(g, x, y + 1, x + SWITCH_W, y + SWITCH_H - 1, on ? SWITCH_ON : SWITCH_OFF);
@@ -250,7 +390,7 @@ public final class KeybindPanel {
 
         float textY = y + (SWITCH_H - font.lineHeight * TOGGLE_TEXT_SCALE) / 2f + 0.5f;
         KeyPromptRenderer.scaled(g, x + SWITCH_W + SWITCH_GAP, textY, TOGGLE_TEXT_SCALE,
-                () -> KeyPromptRenderer.text(g, font, toggleLabel(), 0, 0, on ? HEADER_COLOR : TOGGLE_TEXT, 255));
+                () -> KeyPromptRenderer.text(g, font, label, 0, 0, on ? HEADER_COLOR : TOGGLE_TEXT, 255));
     }
 
     private static String title() {

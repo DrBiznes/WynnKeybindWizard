@@ -76,6 +76,8 @@ public final class WynnKeybindWizard implements ClientModInitializer {
             boolean closes = event.key() == GLFW.GLFW_KEY_ESCAPE
                     || openKey.matches(event)
                     || Minecraft.getInstance().options.keyInventory.matches(event);
+            // Escape backs out of the turn-off confirmation first, leaving the popup open.
+            if (event.key() == GLFW.GLFW_KEY_ESCAPE && KeybindPanel.cancelConfirm()) return false;
             if (closes) KeybindPanel.close();
             return false;
         }

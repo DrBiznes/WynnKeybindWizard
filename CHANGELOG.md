@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- Background opacity now defaults to 50 (was 78).
+- The All Keybinds popup has a **Keybind Wizard enabled** switch at the bottom. Turning it off
+  asks for confirmation first and warns that only editing the config (`"enabled": true`) turns
+  the mod back on.
+
 ## 0.5.0
 
 - The bottom bar now sits on the **bottom edge of the screen**. The new **Bottom bar position**

@@ -79,7 +79,7 @@ public final class BarConfig {
     public int offsetY = 6;
     public float scale = 1.0f;
     /** Opacity of the dark box behind the bars, 0 (just the keys) to 100. */
-    public int backgroundOpacity = 78;
+    public int backgroundOpacity = 50;
     /** Draw a key in its red "pressed" style while it is physically held down. */
     public boolean showHeldKeys = true;
     /**
