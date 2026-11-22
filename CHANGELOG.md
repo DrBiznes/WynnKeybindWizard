@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
 - Key prompts are now drawn with **Wynncraft's own key art**, read from its resource pack while
   it is loaded (on the server, or preloaded by Wynntils). Resource packs that reskin those keys
