@@ -80,10 +80,12 @@ public final class BarConfig {
     public List<String> customCommands = new ArrayList<>(Collections.nCopies(CUSTOM_COMMAND_KEYS.size(), ""));
 
     public List<Entry> keybinds = new ArrayList<>(List.of(
-            new Entry("$spell1", GROUP_SPELLS, "wynntils.keybind.castFirstSpell"),
-            new Entry("$spell2", GROUP_SPELLS, "wynntils.keybind.castSecondSpell"),
-            new Entry("$spell3", GROUP_SPELLS, "wynntils.keybind.castThirdSpell"),
-            new Entry("$spell4", GROUP_SPELLS, "wynntils.keybind.castFourthSpell"),
+            // Each spell is the first bound key of: Wynncraft Spell Caster, Better Wynn Macros,
+            // Wynntils' own spell macros. Whichever macro mod the pack uses shows up.
+            new Entry("$spell1", GROUP_SPELLS, "key.wynncraft-spell-caster.spell.first", "key.ktnwynnmacros.spell.1", "wynntils.keybind.castFirstSpell"),
+            new Entry("$spell2", GROUP_SPELLS, "key.wynncraft-spell-caster.spell.second", "key.ktnwynnmacros.spell.2", "wynntils.keybind.castSecondSpell"),
+            new Entry("$spell3", GROUP_SPELLS, "key.wynncraft-spell-caster.spell.third", "key.ktnwynnmacros.spell.3", "wynntils.keybind.castThirdSpell"),
+            new Entry("$spell4", GROUP_SPELLS, "key.wynncraft-spell-caster.spell.fourth", "key.ktnwynnmacros.spell.4", "wynntils.keybind.castFourthSpell"),
             new Entry("Ultimate", GROUP_SPELLS, "key.swapOffhand"),
 
             new Entry("Quest Book", "Menus", "wynntils.keybind.openContentBook").onBar(),

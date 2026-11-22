@@ -12,6 +12,8 @@ straight away.
   inventory screens, not in the world.
 - **Spell keys**: in their own bar above the inventory, as a row of the bottom bar, or only in the
   popup. They are always the current class's keys, named after its spells when Wynntils is installed.
+  Works with whichever spell macro mod the pack uses: Wynncraft Spell Caster, Better Wynn Macros or
+  Wynntils' own spell keybinds (the first one with a bound key wins).
 - **Dynamic mode** (optional): while an item is hovered the bottom bar shows what you can do with
   that item (compare for gear, stat views for identified items, lock, favorite...), and a keybind you
   cannot use yet (Mount without a mount) gives its slot to the next one in line. Needs Wynntils to

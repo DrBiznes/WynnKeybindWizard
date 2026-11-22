@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Spell keys also come from **Wynncraft Spell Caster** and **Better Wynn Macros**, not just
+  Wynntils' spell keybinds. Each spell shows the first of those that has a key bound.
 - Renamed to **Wynn Keybind Wizard**. The mod id is now `wynnkeybindwizard`, so the config file is
   `config/wynnkeybindwizard.json` and the jar is `wynnkeybindwizard-<version>.jar`.
 - Now MIT licensed, with an icon and project links, ready to be used in any Wynncraft modpack.
