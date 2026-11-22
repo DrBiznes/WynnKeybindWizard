@@ -143,19 +143,20 @@ public final class ClothConfigScreen {
         return builder.build();
     }
 
-    /** One text box per Wynntils custom command slot: what it does in this pack. */
+    /** One text box per custom command slot (Wynntils custom command or WynnMod hotkey): what it does in this pack. */
     private static void addCommandsPage(ConfigBuilder builder, ConfigEntryBuilder entries, BarConfig cfg) {
         ConfigCategory commands = builder.getOrCreateCategory(Component.literal(PAGE_COMMANDS));
         commands.addEntry(entries.startTextDescription(Component.literal(
-                "Name what each of Wynntils' custom command keybinds does in your pack. The commands"
-                        + " themselves are set in Wynntils (Custom Command Keybinds). The name is the label on"
-                        + " the bar and in the popup. Leave a slot empty to hide it.")).build());
+                "Name what each of Wynntils' custom command keybinds (or WynnMod's chat hotkeys) does in"
+                        + " your pack. The commands themselves are set in Wynntils (Custom Command Keybinds) or"
+                        + " WynnMod (Hotkey). The name is the label on the bar and in the popup. Leave a slot"
+                        + " empty to hide it.")).build());
         for (int i = 0; i < BarConfig.CUSTOM_COMMAND_KEYS.size(); i++) {
             int index = i;
             commands.addEntry(entries.startStrField(Component.literal("Custom command " + (i + 1)), cfg.customCommands.get(i))
                     .setDefaultValue("")
                     .setTooltip(Component.literal("Label for Wynntils' \"Execute " + ordinal(i + 1)
-                            + " Custom Command Keybind\", e.g. Party Finder."))
+                            + " Custom Command Keybind\", or WynnMod's \"Hotkey " + (i + 1) + "\", e.g. Party Finder."))
                     .setSaveConsumer(value -> cfg.customCommands.set(index, value.strip()))
                     .build());
         }

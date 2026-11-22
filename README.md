@@ -21,8 +21,8 @@ straight away.
 - **Live**: every prompt is read from the game's keybinds each frame, so rebinding in Controls or a
   Class Keybind Profiles switch shows up immediately. A key is drawn red while physically held.
 - **Missing mods are fine**: an entry whose mod is not installed, or whose key is unbound, is hidden
-  everywhere. The defaults cover Wynntils, Wynnventory, WynnTitles, Nimble ReWynnded, Zoomify and
-  Iris, and only the ones present show up.
+  everywhere. The defaults cover Wynntils, WynnMod, WynnExtras, Wynnventory, WynnTitles, Nimble
+  ReWynnded, Zoomify and Iris, plus the spell macro mods above, and only the ones present show up.
 
 Requires Fabric API. Optional: Wynntils (spell names, item and mount awareness), Cloth Config and
 Mod Menu (the in-game settings screen).
@@ -37,17 +37,19 @@ Mod Menu (the in-game settings screen).
 Players can change the same settings in game. A pack update that ships the file again replaces
 their changes, as with any config a pack ships.
 
-### Wynntils custom commands
+### Custom commands (Wynntils and WynnMod)
 
 Wynntils has six **Custom Command Keybinds** that run a command you choose (set under Wynntils >
-Custom Command Keybinds). What they do differs per pack, so name them on the **Custom Commands**
-page of the settings screen, or in the file:
+Custom Command Keybinds), and WynnMod has six chat **Hotkeys** that do the same. What they do
+differs per pack, so name them on the **Custom Commands** page of the settings screen, or in the
+file:
 
 ```json
 "customCommands": ["Party Finder", "Use Menu", "", "", "", ""]
 ```
 
 Each name is the label for that slot's key on the bar and in the popup. Empty slots are hidden.
+Slot 1 is Wynntils' first custom command or, if that is unbound, WynnMod's Hotkey 1, and so on.
 The slots are the `$command1`..`$command6` entries in `keybinds`, under the `Commands` heading;
 move or regroup them like any other entry.
 
@@ -67,6 +69,16 @@ page with a Remove switch.
 
 Players without that mod never see the entry.
 
+WynnExtras keeps its keys in its own settings instead of Controls, so they are not on the Add
+Keybind page. Name the setting with a `wynnextras:` prefix (the setting names are the ones in
+`config/wynnextras.json`):
+
+```json
+{"label": "Territory Menu", "group": "Menus", "keys": ["wynnextras:territoryMenuKey"]}
+```
+
+The entry is hidden while that WynnExtras feature is switched off.
+
 ## Config reference
 
 | setting | meaning |
@@ -79,7 +91,7 @@ Players without that mod never see the entry.
 | `dynamic` | Item actions while hovering, and hiding keybinds you cannot use yet. |
 | `offsetY`, `scale`, `backgroundOpacity` | Gap from the inventory, size, and darkness (0-100) of the box behind the bars. |
 | `showHeldKeys` | Draw a key red while it is held down. |
-| `customCommands` | Names for Wynntils' six custom command keybinds; see above. |
+| `customCommands` | Names for the six custom command slots (Wynntils custom commands, WynnMod hotkeys); see above. |
 | `keybinds` | Everything the mod shows; see below. |
 
 `keybinds` is one list. Its order is the priority order for the bar. Each entry:
@@ -87,7 +99,7 @@ Players without that mod never see the entry.
 | field | meaning |
 | --- | --- |
 | `label` | Text beside the key. `$spell1`..`$spell4` become spell names, `$command1`..`$command6` the `customCommands` names. |
-| `keys` | Tried in order. A keybind id exactly as it appears after `key_` in `options.txt`, or a physical key such as `key.keyboard.f3` for a fixed prompt. |
+| `keys` | Tried in order. A keybind id exactly as it appears after `key_` in `options.txt`, a WynnExtras setting as `wynnextras:<setting>`, or a physical key such as `key.keyboard.f3` for a fixed prompt. |
 | `group` | Heading in the popup. `Spells` is special: those entries are the spell bar. |
 | `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots`; unpicked ones stay in the popup. |
 | `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`) which makes it an item action. |

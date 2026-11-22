@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import java.util.HashMap;
 import java.util.Map;
+import me.jamino.wynnkeybindwizard.compat.WynnExtrasKeys;
 import me.jamino.wynnkeybindwizard.compat.WynnInfo;
 import me.jamino.wynnkeybindwizard.config.BarConfig;
 import net.minecraft.client.KeyMapping;
@@ -63,13 +64,16 @@ public final class Prompts {
         if (!shown.label.isEmpty()) KeyPromptRenderer.text(g, font, shown.label, labelX, y + 2, labelColor, alpha);
     }
 
-    /** The key currently bound for a keybind id (or the physical key it names), or null. */
+    /** The key currently bound for a keybind id (or the WynnExtras setting or physical key it names), or null. */
     public static InputConstants.Key boundKey(BarConfig.Entry entry) {
         for (String id : entry.keys) {
             KeyMapping mapping = KeyMapping.get(id);
             try {
                 if (mapping != null) {
                     if (!mapping.isUnbound()) return InputConstants.getKey(mapping.saveString());
+                } else if (id.startsWith(WynnExtrasKeys.PREFIX)) {
+                    int code = WynnExtrasKeys.keyCode(id.substring(WynnExtrasKeys.PREFIX.length()));
+                    if (code != GLFW.GLFW_KEY_UNKNOWN) return InputConstants.Type.KEYSYM.getOrCreate(code);
                 } else if (id.startsWith("key.keyboard.") || id.startsWith("key.mouse.")) {
                     return InputConstants.getKey(id);
                 }

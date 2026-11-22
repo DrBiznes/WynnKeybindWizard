@@ -42,6 +42,12 @@ public final class BarConfig {
             "wynntils.keybind.customCommandOne", "wynntils.keybind.customCommandTwo",
             "wynntils.keybind.customCommandThree", "wynntils.keybind.customCommandFour",
             "wynntils.keybind.customCommandFive", "wynntils.keybind.customCommandSix");
+    /**
+     * WynnMod's six chat hotkeys do the same job, so each command slot falls back to the
+     * matching one: a pack uses one mod or the other, and the slot's name covers both.
+     */
+    public static final List<String> WYNNMOD_HOTKEYS = List.of(
+            "Hotkey 1", "Hotkey 2", "Hotkey 3", "Hotkey 4", "Hotkey 5", "Hotkey 6");
     /** Entry label that stands for the text in {@link #customCommands}; {@code $command1}..{@code $command6}. */
     private static final String COMMAND_TOKEN = "$command";
 
@@ -89,12 +95,12 @@ public final class BarConfig {
             new Entry("Ultimate", GROUP_SPELLS, "key.swapOffhand"),
 
             new Entry("Quest Book", "Menus", "wynntils.keybind.openContentBook").onBar(),
-            new Entry("$command1", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(0)).onBar(),
-            new Entry("$command2", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(1)).onBar(),
-            new Entry("$command3", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(2)).onBar(),
-            new Entry("$command4", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(3)).onBar(),
-            new Entry("$command5", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(4)).onBar(),
-            new Entry("$command6", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(5)).onBar(),
+            new Entry("$command1", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(0), WYNNMOD_HOTKEYS.get(0)).onBar(),
+            new Entry("$command2", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(1), WYNNMOD_HOTKEYS.get(1)).onBar(),
+            new Entry("$command3", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(2), WYNNMOD_HOTKEYS.get(2)).onBar(),
+            new Entry("$command4", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(3), WYNNMOD_HOTKEYS.get(3)).onBar(),
+            new Entry("$command5", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(4), WYNNMOD_HOTKEYS.get(4)).onBar(),
+            new Entry("$command6", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(5), WYNNMOD_HOTKEYS.get(5)).onBar(),
             new Entry("Mount", "World", "wynntils.keybind.mountHorse").onBar().when(WHEN_HAS_MOUNT),
             new Entry("Social", "Menus", "wynntils.keybind.openPartyManagement").onBar(),
             new Entry("Item Guide", "Menus", "wynntils.keybind.openGuidesList").onBar(),
@@ -102,10 +108,16 @@ public final class BarConfig {
             new Entry("Lootpools", "Menus", "key.wynnventory.openRewardScreen").onBar(),
             new Entry("Achievements", "Menus", "key.wynntitles.open"),
             new Entry("Ingredient Pouch", "Menus", "wynntils.keybind.openIngredientPouch"),
+            // WynnExtras: shown only while the feature is switched on in WynnExtras.
+            new Entry("Territory Menu", "Menus", "wynnextras:territoryMenuKey"),
+            new Entry("Guild Bank", "Menus", "wynnextras:guildBankKey"),
+            // WynnMod
+            new Entry("Scan Party", "Commands", "Scan Party"),
 
             new Entry("Map", "World", "wynntils.keybind.openMainMap"),
             new Entry("Guild Map", "World", "wynntils.keybind.openGuildMap"),
             new Entry("Third Person", "World", "key.nimblerewynnded.toggleperspective", "key.togglePerspective"),
+            new Entry("Ping", "World", "Ping World"),
             new Entry("Zoom", "World", "zoomify.key.zoom"),
             new Entry("Shaders", "World", "iris.keybind.toggleShaders"),
             new Entry("Sprint", "World", "key.sprint"),
@@ -128,7 +140,8 @@ public final class BarConfig {
      *
      * <p>{@code keys} are tried in order. Each is normally a keybind id exactly as it appears
      * after {@code key_} in options.txt (e.g. {@code wynntils.keybind.openMainMap}), so the prompt
-     * follows rebinds and Class Keybind Profiles. A physical key name such as
+     * follows rebinds and Class Keybind Profiles. {@code wynnextras:<setting>} reads a key from
+     * WynnExtras' own settings (see {@link me.jamino.wynnkeybindwizard.compat.WynnExtrasKeys}). A physical key name such as
      * {@code key.keyboard.f3} also works for prompts that are not rebindable. An entry whose
      * keybind is missing (mod not installed) or unbound is hidden everywhere.
      *

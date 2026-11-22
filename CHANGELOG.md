@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **WynnMod** support: its six chat hotkeys fill the custom command slots when Wynntils' custom
+  commands are unbound, and Ping and Scan Party are in the popup.
+- **WynnExtras** support: entries can read keys from WynnExtras' own settings with
+  `wynnextras:<setting>`. Territory Menu and Guild Bank are in the popup while those WynnExtras
+  features are on.
 - Spell keys also come from **Wynncraft Spell Caster** and **Better Wynn Macros**, not just
   Wynntils' spell keybinds. Each spell shows the first of those that has a key bound.
 - Renamed to **Wynn Keybind Wizard**. The mod id is now `wynnkeybindwizard`, so the config file is
