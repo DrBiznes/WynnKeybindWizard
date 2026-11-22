@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The Background switch is now a **Background opacity** slider (`backgroundOpacity`, 0-100). At 0
+  the bars show just the keys with no box behind them.
 - Hovering an item now shows at most 5 actions (new `itemSlots` setting, "Item actions on the bar"
   in the settings screen). The normal bar still holds 6.
 - Screenshot and Mark to Compare no longer show on the bar while hovering an item. They are still

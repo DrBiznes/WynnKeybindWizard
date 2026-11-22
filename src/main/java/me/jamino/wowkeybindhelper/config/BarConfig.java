@@ -58,7 +58,8 @@ public final class BarConfig {
     /** Gap between the inventory and the bars. */
     public int offsetY = 6;
     public float scale = 1.0f;
-    public boolean background = true;
+    /** Opacity of the dark box behind the bars, 0 (just the keys) to 100. */
+    public int backgroundOpacity = 78;
     /** Draw a key in its red "pressed" style while it is physically held down. */
     public boolean showHeldKeys = true;
 
@@ -197,6 +198,7 @@ public final class BarConfig {
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);
         itemSlots = Math.clamp(itemSlots, 1, 12);
+        backgroundOpacity = Math.clamp(backgroundOpacity, 0, 100);
         return this;
     }
 

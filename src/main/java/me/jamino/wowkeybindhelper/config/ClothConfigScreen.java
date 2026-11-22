@@ -66,9 +66,12 @@ public final class ClothConfigScreen {
                 .setDefaultValue(defaults.showHeldKeys)
                 .setSaveConsumer(value -> cfg.showHeldKeys = value)
                 .build());
-        general.addEntry(entries.startBooleanToggle(Component.literal("Background"), cfg.background)
-                .setDefaultValue(defaults.background)
-                .setSaveConsumer(value -> cfg.background = value)
+        general.addEntry(entries.startIntSlider(Component.literal("Background opacity"), cfg.backgroundOpacity, 0, 100)
+                .setDefaultValue(defaults.backgroundOpacity)
+                .setTextGetter(value -> Component.literal(value == 0 ? "Off" : value + "%"))
+                .setTooltip(Component.literal("How dark the box behind the bars is."),
+                        Component.literal("0 hides it, leaving just the keys."))
+                .setSaveConsumer(value -> cfg.backgroundOpacity = value)
                 .build());
         general.addEntry(entries.startFloatField(Component.literal("Scale"), cfg.scale)
                 .setDefaultValue(defaults.scale)

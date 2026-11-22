@@ -43,7 +43,7 @@ public final class KeybindBar {
     /** Keeps the item actions up while the mouse crosses the gap between two slots. */
     private static final long ITEM_LINGER_MS = 150;
 
-    private static final int BACKGROUND = 0xC8101014;
+    private static final int BACKGROUND_RGB = 0x101014;
     private static final int BUTTON_COLOR = 0xFFD37F;
     private static final int BUTTON_HOVER_COLOR = 0xFFFFFF;
 
@@ -210,11 +210,12 @@ public final class KeybindBar {
         if (isBottom) BAR.set(centerX + left * scale, top, centerX + (left + width) * scale, top + height * scale);
 
         KeyPromptRenderer.scaled(g, centerX, top, scale, () -> {
-            if (cfg.background) {
+            if (cfg.backgroundOpacity > 0) {
+                int bg = KeyPromptRenderer.argb(Math.round(cfg.backgroundOpacity * 2.55f), BACKGROUND_RGB);
                 // A rectangle with the four corner pixels knocked off.
-                KeyPromptRenderer.rect(g, left + 1, 0, left + width - 1, height, BACKGROUND);
-                KeyPromptRenderer.rect(g, left, 1, left + 1, height - 1, BACKGROUND);
-                KeyPromptRenderer.rect(g, left + width - 1, 1, left + width, height - 1, BACKGROUND);
+                KeyPromptRenderer.rect(g, left + 1, 0, left + width - 1, height, bg);
+                KeyPromptRenderer.rect(g, left, 1, left + 1, height - 1, bg);
+                KeyPromptRenderer.rect(g, left + width - 1, 1, left + width, height - 1, bg);
             }
             int y = PAD_Y;
             for (int i = 0; i < rows.size(); i++) {
