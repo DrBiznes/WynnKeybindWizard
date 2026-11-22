@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Hovering an item now shows at most 5 actions (new `itemSlots` setting, "Item actions on the bar"
+  in the settings screen). The normal bar still holds 6.
+- Screenshot and Mark to Compare no longer show on the bar while hovering an item. They are still
+  in the All Keybinds popup.
+- Item actions now use `onBar` like other keybinds, and the settings screen has an Item Actions page
+  to pick them. Older config files are updated automatically when they load.
+
 ## 0.3.0
 
 - The All Keybinds popup now opens only from inventory screens. The key no longer does anything in

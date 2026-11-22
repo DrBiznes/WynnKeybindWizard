@@ -31,7 +31,7 @@ changed in game; adding new keybind entries is done in the file.
 | `label` | Text beside the key. `$spell1`..`$spell4` become spell names. |
 | `keys` | Tried in order. A keybind id exactly as it appears after `key_` in `options.txt`, or a physical key such as `key.keyboard.f3` for a fixed prompt. |
 | `group` | Heading in the popup. `Spells` is special: those entries are the spell bar. |
-| `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. |
+| `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots` (default 5); unpicked ones stay in the popup. |
 | `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`) which makes it an item action. |
 
 An entry whose keybind does not exist (mod not installed) or is unbound is hidden everywhere.

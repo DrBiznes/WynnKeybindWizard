@@ -36,6 +36,8 @@ public final class BarConfig {
     public static final String GROUP_SPELLS = "Spells";
 
     private static final String LOCK_FALLBACK = "key.mouse.middle";
+    private static final String SCREENSHOT_KEY = "wynntils.keybind.screenshotItem";
+    private static final String MARK_COMPARE_KEY = "wynntils.keybind.selectForComparing";
 
     private static BarConfig instance = new BarConfig();
     private static FileTime loadedAt;
@@ -45,6 +47,8 @@ public final class BarConfig {
     public boolean showOnAllContainers = false;
     /** How many keybinds the bottom bar holds (the All Keybinds button is extra). */
     public int barSlots = 6;
+    /** How many item actions the bottom bar holds while an item is hovered (dynamic mode). */
+    public int itemSlots = 5;
     public SpellBar spellBar = SpellBar.TOP;
     /**
      * Context awareness: the bar swaps to item actions while an item is hovered, and entries
@@ -84,15 +88,17 @@ public final class BarConfig {
             new Entry("Sprint", "World", "key.sprint"),
             new Entry("Sneak", "World", "key.sneak"),
 
-            new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").when(WHEN_ITEM_GEAR),
-            new Entry("Stat Ranges", "Items", "wynntils.keybind.showIdentificationRange").when(WHEN_ITEM_STATS),
-            new Entry("Reroll Chance", "Items", "wynntils.keybind.showIdentificationReroll").when(WHEN_ITEM_STATS),
+            new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").onBar().when(WHEN_ITEM_GEAR),
+            new Entry("Stat Ranges", "Items", "wynntils.keybind.showIdentificationRange").onBar().when(WHEN_ITEM_STATS),
+            new Entry("Reroll Chance", "Items", "wynntils.keybind.showIdentificationReroll").onBar().when(WHEN_ITEM_STATS),
             // Wynntils' slot lock, else Wynncraft's own middle-click lock. One entry: they are the
             // same button by default and listing both read as two different actions.
-            new Entry("Lock Slot", "Items", "wynntils.keybind.lockSlot", LOCK_FALLBACK).when(WHEN_ITEM),
-            new Entry("Favorite", "Items", "wynntils.keybind.toggleFavorite").when(WHEN_ITEM),
-            new Entry("Screenshot", "Items", "wynntils.keybind.screenshotItem").when(WHEN_ITEM),
-            new Entry("Mark to Compare", "Items", "wynntils.keybind.selectForComparing").when(WHEN_ITEM_GEAR)));
+            new Entry("Lock Slot", "Items", "wynntils.keybind.lockSlot", LOCK_FALLBACK).onBar().when(WHEN_ITEM),
+            new Entry("Favorite", "Items", "wynntils.keybind.toggleFavorite").onBar().when(WHEN_ITEM),
+            // Popup only: another mod already shows the screenshot key beside the screen, and
+            // Mark to Compare is close enough to Compare.
+            new Entry("Screenshot", "Items", SCREENSHOT_KEY).when(WHEN_ITEM),
+            new Entry("Mark to Compare", "Items", MARK_COMPARE_KEY).when(WHEN_ITEM_GEAR)));
 
     /**
      * One keybind prompt.
@@ -104,8 +110,8 @@ public final class BarConfig {
      * keybind is missing (mod not installed) or unbound is hidden everywhere.
      *
      * <p>{@code when} is empty for "always", {@code has_mount}, or one of the item conditions
-     * ({@code item}, {@code item_stats}, {@code item_gear}); item entries are what the bar shows
-     * while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names.
+     * ({@code item}, {@code item_stats}, {@code item_gear}); item entries with {@code onBar} are
+     * what the bar shows while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names.
      */
     public static final class Entry {
         public String label = "";
@@ -186,10 +192,26 @@ public final class BarConfig {
             entry.keys.removeIf(key -> key == null);
         }
         mergeItemLock();
+        pickItemBar();
         if (spellBar == null) spellBar = SpellBar.TOP;
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);
+        itemSlots = Math.clamp(itemSlots, 1, 12);
         return this;
+    }
+
+    /**
+     * Before 0.4.0 every item action was offered on the bar and {@code onBar} meant nothing for
+     * them, so such files have it off everywhere. Turn it on for all of them except the stock
+     * Screenshot and Mark to Compare entries, matching the new defaults. Once any item action is
+     * on the bar this no longer applies.
+     */
+    private void pickItemBar() {
+        List<Entry> items = keybinds.stream().filter(Entry::isItemAction).toList();
+        if (items.isEmpty() || items.stream().anyMatch(entry -> entry.onBar)) return;
+        for (Entry entry : items) {
+            entry.onBar = !entry.keys.equals(List.of(SCREENSHOT_KEY)) && !entry.keys.equals(List.of(MARK_COMPARE_KEY));
+        }
     }
 
     /**

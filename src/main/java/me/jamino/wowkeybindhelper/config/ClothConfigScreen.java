@@ -52,6 +52,11 @@ public final class ClothConfigScreen {
                 .setDefaultValue(defaults.barSlots)
                 .setSaveConsumer(value -> cfg.barSlots = value)
                 .build());
+        general.addEntry(entries.startIntSlider(Component.literal("Item actions on the bar"), cfg.itemSlots, 1, 12)
+                .setDefaultValue(defaults.itemSlots)
+                .setTooltip(Component.literal("How many actions the bar shows while you hover an item."))
+                .setSaveConsumer(value -> cfg.itemSlots = value)
+                .build());
         general.addEntry(entries.startBooleanToggle(Component.literal("Show on all containers"), cfg.showOnAllContainers)
                 .setDefaultValue(defaults.showOnAllContainers)
                 .setTooltip(Component.literal("Also show under banks, chests and other container screens."))
@@ -78,21 +83,31 @@ public final class ClothConfigScreen {
                 .setSaveConsumer(value -> cfg.offsetY = value)
                 .build());
 
-        // One toggle per keybind that could go on the bar. Spells and item actions have their
-        // own switches above, so they are not listed.
+        // One toggle per keybind that could go on the bar. Spells have their own switch above.
         ConfigCategory bar = builder.getOrCreateCategory(Component.literal("Bottom Bar"));
         bar.addEntry(entries.startTextDescription(Component.literal(
                 "Pick what goes on the bar. It shows the first ones that fit, in this order;"
                         + " reorder or add keybinds in config/wowkeybindhelper.json.")).build());
+        ConfigCategory items = builder.getOrCreateCategory(Component.literal("Item Actions"));
+        items.addEntry(entries.startTextDescription(Component.literal(
+                "Pick what the bar shows while you hover an item (dynamic mode). Unpicked actions"
+                        + " are still listed in the All Keybinds popup.")).build());
         for (BarConfig.Entry entry : cfg.keybinds) {
-            if (entry.isSpell() || entry.isItemAction()) continue;
-            String name = entry.group.isEmpty() ? entry.label : entry.label + "  (" + entry.group + ")";
-            bar.addEntry(entries.startBooleanToggle(Component.literal(name), entry.onBar)
-                    .setDefaultValue(false)
+            if (entry.isSpell()) continue;
+            String name = entry.group.isEmpty() || entry.isItemAction()
+                    ? entry.label : entry.label + "  (" + entry.group + ")";
+            (entry.isItemAction() ? items : bar).addEntry(entries.startBooleanToggle(Component.literal(name), entry.onBar)
+                    .setDefaultValue(defaultOnBar(defaults, entry))
                     .setSaveConsumer(value -> entry.onBar = value)
                     .build());
         }
 
         return builder.build();
+    }
+
+    /** The shipped default for this entry, matched by label and keys; off for anything hand-made. */
+    private static boolean defaultOnBar(BarConfig defaults, BarConfig.Entry entry) {
+        return defaults.keybinds.stream().anyMatch(stock -> stock.onBar
+                && stock.label.equals(entry.label) && stock.keys.equals(entry.keys));
     }
 }

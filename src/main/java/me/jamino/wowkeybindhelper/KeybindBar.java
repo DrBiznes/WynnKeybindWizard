@@ -112,7 +112,8 @@ public final class KeybindBar {
             if (entry.isSpell()) {
                 if (cfg.spellBar != BarConfig.SpellBar.OFF) addIfBound(spells, entry, font);
             } else if (entry.isItemAction()) {
-                if (traits == null || itemActions.size() >= cfg.barSlots || !applies(entry.when, traits)) continue;
+                if (traits == null || !entry.onBar || itemActions.size() >= cfg.itemSlots
+                        || !applies(entry.when, traits)) continue;
                 Shown shown = Prompts.resolve(entry, font);
                 // Two actions on one key (Wynntils puts several views on Shift) would read as a
                 // contradiction; the earlier entry in the list wins.
