@@ -4,6 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import me.jamino.wowkeybindhelper.AllKeybindsScreen;
+import me.jamino.wowkeybindhelper.KeybindPanel;
+import me.jamino.wowkeybindhelper.config.ClothConfigScreen;
 import me.jamino.wowkeybindhelper.mixin.AbstractContainerScreenAccessor;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -12,67 +15,56 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import org.lwjgl.glfw.GLFW;
 
 /**
- * Opens the real inventory with a config that mirrors the modpack's bar and screenshots it.
+ * Opens the real inventory with a config that mirrors the modpack's layout and screenshots it.
  *
  * <p>The pack's mods (Wynntils etc.) are not in the dev client, so their binds are stood in for by
- * the physical keys they are bound to in the pack. The vanilla binds (Ultimate, Third Person,
- * Sprint, Sneak) go through real KeyMappings, and Sprint is rebound mid-test to prove the bar
- * follows a rebind without reopening anything.
+ * the physical keys they are bound to in the pack; the vanilla binds (Ultimate, Third Person,
+ * Sprint, Sneak) go through real KeyMappings. Without Wynntils every "don't know" answer applies:
+ * spells are "Spell N", the mount is assumed owned, and every item action is offered.
  */
 public class InventoryBarTest implements FabricClientGameTest {
-    private static final String CONFIG = """
-            {
-              "cycleSeconds": 0,
-              "pinned": [
-                {"label": "$spell1", "keys": ["key.mouse.5"]},
-                {"label": "$spell2", "keys": ["key.keyboard.r"]},
-                {"label": "$spell3", "keys": ["key.keyboard.q"]},
-                {"label": "$spell4", "keys": ["key.mouse.4"]},
-                {"label": "Ultimate", "keys": ["key.swapOffhand"]}
-              ],
-              "pages": [
-                {"entries": [
-                  {"label": "Party Finder", "keys": ["key.keyboard.p"]},
-                  {"label": "Social", "keys": ["key.keyboard.o"]},
-                  {"label": "Quest Book", "keys": ["key.keyboard.j"]},
-                  {"label": "Item Guide", "keys": ["key.keyboard.g"]},
-                  {"label": "Use Menu", "keys": ["key.keyboard.u"]},
-                  {"label": "Lootpools", "keys": ["key.keyboard.n"]},
-                  {"label": "Achievements", "keys": ["key.keyboard.grave.accent"]}
-                ]},
-                {"entries": [
-                  {"label": "Map", "keys": ["key.keyboard.m"]},
-                  {"label": "Guild Map", "keys": ["key.keyboard.k"]},
-                  {"label": "Mount", "keys": ["key.keyboard.h"]},
-                  {"label": "Third Person", "keys": ["not.installed.mod", "key.togglePerspective"]},
-                  {"label": "Zoom", "keys": ["key.keyboard.c"]},
-                  {"label": "Shaders", "keys": ["key.keyboard.equal"]},
-                  {"label": "Sprint", "keys": ["key.sprint"]},
-                  {"label": "Sneak", "keys": ["key.sneak"]},
-                  {"label": "Hidden", "keys": ["not.installed.mod"]}
-                ]}
-              ],
-              "itemHover": [
-                {"label": "Lock Slot", "keys": ["key.mouse.middle"]},
-                {"label": "Favorite", "keys": ["key.keyboard.f"]},
-                {"label": "Share", "keys": ["key.keyboard.f3"]},
-                {"label": "Screenshot", "keys": ["key.keyboard.f4"]},
-                {"label": "ID Ranges", "keys": ["key.keyboard.left.shift"]},
-                {"label": "Attack", "keys": ["key.attack"]}
+    private static final String KEYBINDS = """
+              "keybinds": [
+                {"label": "$spell1", "group": "Spells", "keys": ["key.mouse.5"]},
+                {"label": "$spell2", "group": "Spells", "keys": ["key.keyboard.r"]},
+                {"label": "$spell3", "group": "Spells", "keys": ["key.keyboard.q"]},
+                {"label": "$spell4", "group": "Spells", "keys": ["key.mouse.4"]},
+                {"label": "Ultimate", "group": "Spells", "keys": ["key.swapOffhand"]},
+                {"label": "Quest Book", "group": "Menus", "keys": ["key.keyboard.j"], "onBar": true},
+                {"label": "Party Finder", "group": "Menus", "keys": ["key.keyboard.p"], "onBar": true},
+                {"label": "Use Menu", "group": "Menus", "keys": ["key.keyboard.u"], "onBar": true},
+                {"label": "Mount", "group": "World", "keys": ["key.keyboard.h"], "onBar": true, "when": "has_mount"},
+                {"label": "Social", "group": "Menus", "keys": ["key.keyboard.o"], "onBar": true},
+                {"label": "Not Installed", "group": "Menus", "keys": ["not.installed.mod"], "onBar": true},
+                {"label": "Item Guide", "group": "Menus", "keys": ["key.keyboard.g"], "onBar": true},
+                {"label": "Lootpools", "group": "Menus", "keys": ["key.keyboard.n"], "onBar": true},
+                {"label": "Achievements", "group": "Menus", "keys": ["key.keyboard.grave.accent"]},
+                {"label": "Map", "group": "World", "keys": ["key.keyboard.m"]},
+                {"label": "Guild Map", "group": "World", "keys": ["key.keyboard.k"]},
+                {"label": "Third Person", "group": "World", "keys": ["not.installed.mod", "key.togglePerspective"]},
+                {"label": "Zoom", "group": "World", "keys": ["key.keyboard.c"]},
+                {"label": "Shaders", "group": "World", "keys": ["key.keyboard.equal"]},
+                {"label": "Sprint", "group": "World", "keys": ["key.sprint"]},
+                {"label": "Sneak", "group": "World", "keys": ["key.sneak"]},
+                {"label": "Compare", "group": "Items", "keys": ["key.keyboard.keypad.enter"], "when": "item_gear"},
+                {"label": "Stat Ranges", "group": "Items", "keys": ["key.keyboard.left.shift"], "when": "item_stats"},
+                {"label": "Reroll Chance", "group": "Items", "keys": ["key.keyboard.left.control"], "when": "item_stats"},
+                {"label": "Lock Slot", "group": "Items", "keys": ["key.mouse.middle"], "when": "item"},
+                {"label": "Favorite", "group": "Items", "keys": ["key.keyboard.f"], "when": "item"},
+                {"label": "Same Key As Favorite", "group": "Items", "keys": ["key.keyboard.f"], "when": "item"},
+                {"label": "Share", "group": "Items", "keys": ["key.keyboard.f3"], "when": "item_stats"},
+                {"label": "Screenshot", "group": "Items", "keys": ["key.keyboard.f4"], "when": "item"}
               ]
-            }
             """;
+
+    private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("wowkeybindhelper.json");
 
     @Override
     public void runTest(ClientGameTestContext context) {
-        Path config = FabricLoader.getInstance().getConfigDir().resolve("wowkeybindhelper.json");
-        try {
-            Files.writeString(config, CONFIG);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        writeConfig("\"spellBar\": \"TOP\"");
 
         try (TestSingleplayerContext world = context.worldBuilder().create()) {
             world.getClientWorld().waitForChunksRender();
@@ -88,44 +80,81 @@ public class InventoryBarTest implements FabricClientGameTest {
             });
             context.waitTicks(10);
 
-            context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
-            context.getInput().setCursorPos(5, 5);
-            context.waitTicks(10);
-            context.takeScreenshot("1-page-one");
-
-            // Left click on the bar flips to the next page.
-            double[] spots = context.computeOnClient(mc -> {
-                AbstractContainerScreenAccessor gui = (AbstractContainerScreenAccessor) mc.screen;
-                double scale = mc.getWindow().getGuiScale();
-                return new double[] {
-                    (gui.wkh$leftPos() + gui.wkh$imageWidth() / 2.0) * scale,
-                    (gui.wkh$topPos() + gui.wkh$imageHeight() + 16) * scale,
-                    (gui.wkh$leftPos() + 16) * scale,
-                    (gui.wkh$topPos() + 150) * scale
-                };
-            });
-            context.getInput().setCursorPos(spots[0], spots[1]);
-            context.waitTicks(2);
-            context.getInput().pressMouse(0);
-            context.getInput().setCursorPos(5, 5);
-            context.waitTicks(10);
-            context.takeScreenshot("2-page-two-after-click");
+            openInventory(context);
+            context.takeScreenshot("1-bar-with-spells-on-top");
 
             // Rebind while the inventory is open, like Class Keybind Profiles does.
-            context.runOnClient(mc -> bind("key.sprint", "key.keyboard.x"));
+            context.runOnClient(mc -> bind("key.swapOffhand", "key.keyboard.x"));
             context.waitTicks(5);
-            context.takeScreenshot("3-sprint-rebound-to-x");
+            context.takeScreenshot("2-ultimate-rebound-to-x");
+            context.runOnClient(mc -> bind("key.swapOffhand", "key.keyboard.f"));
 
-            // Hovering an item swaps the page for the item actions.
-            context.getInput().setCursorPos(spots[2], spots[3]);
+            // Hovering an item swaps the bar for the item actions.
+            double[] slot = context.computeOnClient(mc -> {
+                AbstractContainerScreenAccessor gui = (AbstractContainerScreenAccessor) mc.screen;
+                double scale = mc.getWindow().getGuiScale();
+                return new double[] {(gui.wkh$leftPos() + 16) * scale, (gui.wkh$topPos() + 150) * scale};
+            });
+            context.getInput().setCursorPos(slot[0], slot[1]);
             context.waitTicks(10);
-            context.takeScreenshot("4-item-hovered");
+            context.takeScreenshot("3-item-hovered");
+
+            // The hotkey opens the popup over the inventory; the item tooltip must not cover it.
+            context.getInput().pressKey(GLFW.GLFW_KEY_Y);
+            context.waitTicks(5);
+            if (!KeybindPanel.isOpen()) throw new AssertionError("hotkey did not open the popup");
+            context.takeScreenshot("4-popup-over-inventory");
+
+            // Escape closes the popup, not the inventory.
+            context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+            context.waitTicks(5);
+            boolean stillInInventory = context.computeOnClient(mc -> mc.screen instanceof InventoryScreen);
+            if (KeybindPanel.isOpen() || !stillInInventory) {
+                throw new AssertionError("Escape should close only the popup");
+            }
+
+            // Spells pinned to the bottom bar instead, dynamic mode off.
+            context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+            context.waitTicks(5);
+            writeConfig("\"spellBar\": \"BOTTOM\", \"dynamic\": false");
+            openInventory(context);
+            context.getInput().setCursorPos(slot[0], slot[1]);
+            context.waitTicks(10);
+            context.takeScreenshot("5-spells-on-bottom-dynamic-off");
+
+            // From the world, the hotkey opens the popup as its own screen.
+            context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+            context.waitTicks(5);
+            context.getInput().pressKey(GLFW.GLFW_KEY_Y);
+            context.waitTicks(10);
+            boolean opened = context.computeOnClient(mc -> mc.screen instanceof AllKeybindsScreen);
+            if (!opened) throw new AssertionError("hotkey did not open the popup screen in the world");
+            context.takeScreenshot("6-popup-from-world");
+
+            // The Cloth Config screen builds and opens.
+            context.setScreen(() -> ClothConfigScreen.create(null));
+            context.waitTicks(10);
+            context.takeScreenshot("7-settings-screen");
         } finally {
             try {
-                Files.deleteIfExists(config);
+                Files.deleteIfExists(CONFIG);
             } catch (IOException ignored) {
                 // Only the throwaway test run directory is affected.
             }
+        }
+    }
+
+    private static void openInventory(ClientGameTestContext context) {
+        context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+        context.getInput().setCursorPos(5, 5);
+        context.waitTicks(10);
+    }
+
+    private static void writeConfig(String settings) {
+        try {
+            Files.writeString(CONFIG, "{\n  " + settings + ",\n" + KEYBINDS + "}\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

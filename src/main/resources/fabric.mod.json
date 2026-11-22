@@ -8,7 +8,8 @@
   "license": "All-Rights-Reserved",
   "environment": "client",
   "entrypoints": {
-    "client": ["me.jamino.wowkeybindhelper.WowKeybindHelper"]
+    "client": ["me.jamino.wowkeybindhelper.WowKeybindHelper"],
+    "modmenu": ["me.jamino.wowkeybindhelper.config.ModMenuIntegration"]
   },
   "mixins": ["wowkeybindhelper.mixins.json"],
   "depends": {
@@ -19,6 +20,8 @@
   },
   "suggests": {
     "wynntils": "*",
+    "cloth-config2": "*",
+    "modmenu": "*",
     "classkeybindprofiles": "*"
   }
 }

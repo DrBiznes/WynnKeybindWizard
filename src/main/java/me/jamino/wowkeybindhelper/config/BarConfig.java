@@ -13,17 +13,27 @@ import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * config/wowkeybindhelper.json. The modpack ships this file; the defaults below are the
- * World of Wynncraft layout and are written out on first launch.
+ * World of Wynncraft layout and are written out on first launch. The optional Cloth Config
+ * screen edits this same object and saves it back through {@link #save()}.
  *
- * <p>An entry's {@code keys} are tried in order. Each is normally a keybind id exactly as it
- * appears after {@code key_} in options.txt (e.g. {@code wynntils.keybind.openMainMap}), so the
- * prompt follows rebinds and Class Keybind Profiles. A physical key name such as
- * {@code key.keyboard.f3} also works for prompts that are not rebindable. Entries whose keybind
- * is missing (mod not installed) or unbound are hidden.
+ * <p>{@link #keybinds} is the one list of everything the mod knows about. Its order is the
+ * priority order for the bar; {@code group} only decides which heading an entry sits under in
+ * the All Keybinds popup.
  */
 public final class BarConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wowkeybindhelper.json");
+
+    /** Where the spell keys are shown on the inventory. They are always in the popup. */
+    public enum SpellBar { TOP, BOTTOM, OFF }
+
+    /** Values for {@link Entry#when}. */
+    public static final String WHEN_HAS_MOUNT = "has_mount";
+    public static final String WHEN_ITEM = "item";
+    public static final String WHEN_ITEM_STATS = "item_stats";
+    public static final String WHEN_ITEM_GEAR = "item_gear";
+
+    public static final String GROUP_SPELLS = "Spells";
 
     private static BarConfig instance = new BarConfig();
     private static FileTime loadedAt;
@@ -31,73 +41,99 @@ public final class BarConfig {
     public boolean enabled = true;
     /** Also show under chests, banks and other container screens, not just the inventory. */
     public boolean showOnAllContainers = false;
-    /** Preferred bar width in GUI pixels. It grows on its own when the screen is too short. */
-    public int maxWidth = 300;
-    /** Gap between the bottom of the inventory and the bar. */
+    /** How many keybinds the bottom bar holds (the All Keybinds button is extra). */
+    public int barSlots = 6;
+    public SpellBar spellBar = SpellBar.TOP;
+    /**
+     * Context awareness: the bar swaps to item actions while an item is hovered, and entries
+     * whose {@code when} is not met (no mount yet) give their slot to the next one in line.
+     */
+    public boolean dynamic = true;
+    /** Gap between the inventory and the bars. */
     public int offsetY = 6;
     public float scale = 1.0f;
-    /** Seconds each page stays up. 0 disables auto-cycling (click or scroll the bar instead). */
-    public int cycleSeconds = 6;
     public boolean background = true;
     /** Draw a key in its red "pressed" style while it is physically held down. */
     public boolean showHeldKeys = true;
 
-    /** Always visible, above the pages. */
-    public List<Entry> pinned = new ArrayList<>(List.of(
-            new Entry("$spell1", "wynntils.keybind.castFirstSpell"),
-            new Entry("$spell2", "wynntils.keybind.castSecondSpell"),
-            new Entry("$spell3", "wynntils.keybind.castThirdSpell"),
-            new Entry("$spell4", "wynntils.keybind.castFourthSpell"),
-            new Entry("Ultimate", "key.swapOffhand")));
+    public List<Entry> keybinds = new ArrayList<>(List.of(
+            new Entry("$spell1", GROUP_SPELLS, "wynntils.keybind.castFirstSpell"),
+            new Entry("$spell2", GROUP_SPELLS, "wynntils.keybind.castSecondSpell"),
+            new Entry("$spell3", GROUP_SPELLS, "wynntils.keybind.castThirdSpell"),
+            new Entry("$spell4", GROUP_SPELLS, "wynntils.keybind.castFourthSpell"),
+            new Entry("Ultimate", GROUP_SPELLS, "key.swapOffhand"),
 
-    /** Cycled through one at a time. */
-    public List<Page> pages = new ArrayList<>(List.of(
-            new Page(
-                    new Entry("Party Finder", "wynntils.keybind.customCommandOne"),
-                    new Entry("Social", "wynntils.keybind.openPartyManagement"),
-                    new Entry("Quest Book", "wynntils.keybind.openContentBook"),
-                    new Entry("Item Guide", "wynntils.keybind.openGuidesList"),
-                    new Entry("Use Menu", "wynntils.keybind.customCommandTwo"),
-                    new Entry("Lootpools", "key.wynnventory.openRewardScreen"),
-                    new Entry("Achievements", "key.wynntitles.open")),
-            new Page(
-                    new Entry("Map", "wynntils.keybind.openMainMap"),
-                    new Entry("Guild Map", "wynntils.keybind.openGuildMap"),
-                    new Entry("Mount", "wynntils.keybind.mountHorse"),
-                    new Entry("Third Person", "key.nimblerewynnded.toggleperspective", "key.togglePerspective"),
-                    new Entry("Zoom", "zoomify.key.zoom"),
-                    new Entry("Shaders", "iris.keybind.toggleShaders"),
-                    new Entry("Sprint", "key.sprint"),
-                    new Entry("Sneak", "key.sneak"))));
+            new Entry("Quest Book", "Menus", "wynntils.keybind.openContentBook").onBar(),
+            new Entry("Party Finder", "Menus", "wynntils.keybind.customCommandOne").onBar(),
+            new Entry("Use Menu", "Menus", "wynntils.keybind.customCommandTwo").onBar(),
+            new Entry("Mount", "World", "wynntils.keybind.mountHorse").onBar().when(WHEN_HAS_MOUNT),
+            new Entry("Social", "Menus", "wynntils.keybind.openPartyManagement").onBar(),
+            new Entry("Item Guide", "Menus", "wynntils.keybind.openGuidesList").onBar(),
+            // Seventh in line: only reaches the bar when something above it is hidden.
+            new Entry("Lootpools", "Menus", "key.wynnventory.openRewardScreen").onBar(),
+            new Entry("Achievements", "Menus", "key.wynntitles.open"),
 
-    /** Replaces the current page while the mouse is over an item. */
-    public List<Entry> itemHover = new ArrayList<>(List.of(
-            new Entry("Lock Slot", "wynntils.keybind.lockSlot"),
-            new Entry("Favorite", "wynntils.keybind.toggleFavorite"),
-            new Entry("Share", "wynntils.keybind.shareItem"),
-            new Entry("Screenshot", "wynntils.keybind.screenshotItem"),
-            new Entry("ID Ranges", "wynntils.keybind.showIdentificationRange"),
-            new Entry("Search Market", "wynntils.keybind.quickSearchTradeMarket")));
+            new Entry("Map", "World", "wynntils.keybind.openMainMap"),
+            new Entry("Guild Map", "World", "wynntils.keybind.openGuildMap"),
+            new Entry("Third Person", "World", "key.nimblerewynnded.toggleperspective", "key.togglePerspective"),
+            new Entry("Zoom", "World", "zoomify.key.zoom"),
+            new Entry("Shaders", "World", "iris.keybind.toggleShaders"),
+            new Entry("Sprint", "World", "key.sprint"),
+            new Entry("Sneak", "World", "key.sneak"),
 
+            new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").when(WHEN_ITEM_GEAR),
+            new Entry("Stat Ranges", "Items", "wynntils.keybind.showIdentificationRange").when(WHEN_ITEM_STATS),
+            new Entry("Reroll Chance", "Items", "wynntils.keybind.showIdentificationReroll").when(WHEN_ITEM_STATS),
+            new Entry("Lock Slot", "Items", "wynntils.keybind.lockSlot").when(WHEN_ITEM),
+            new Entry("Favorite", "Items", "wynntils.keybind.toggleFavorite").when(WHEN_ITEM),
+            new Entry("Share", "Items", "wynntils.keybind.shareItem").when(WHEN_ITEM_STATS),
+            new Entry("Screenshot", "Items", "wynntils.keybind.screenshotItem").when(WHEN_ITEM),
+            new Entry("Mark to Compare", "Items", "wynntils.keybind.selectForComparing").when(WHEN_ITEM_GEAR)));
+
+    /**
+     * One keybind prompt.
+     *
+     * <p>{@code keys} are tried in order. Each is normally a keybind id exactly as it appears
+     * after {@code key_} in options.txt (e.g. {@code wynntils.keybind.openMainMap}), so the prompt
+     * follows rebinds and Class Keybind Profiles. A physical key name such as
+     * {@code key.keyboard.f3} also works for prompts that are not rebindable. An entry whose
+     * keybind is missing (mod not installed) or unbound is hidden everywhere.
+     *
+     * <p>{@code when} is empty for "always", {@code has_mount}, or one of the item conditions
+     * ({@code item}, {@code item_stats}, {@code item_gear}); item entries are what the bar shows
+     * while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names.
+     */
     public static final class Entry {
         public String label = "";
+        public String group = "";
         public List<String> keys = new ArrayList<>();
+        public boolean onBar = false;
+        public String when = "";
 
         public Entry() {}
 
-        Entry(String label, String... keys) {
+        Entry(String label, String group, String... keys) {
             this.label = label;
+            this.group = group;
             this.keys = new ArrayList<>(List.of(keys));
         }
-    }
 
-    public static final class Page {
-        public List<Entry> entries = new ArrayList<>();
+        Entry onBar() {
+            this.onBar = true;
+            return this;
+        }
 
-        public Page() {}
+        Entry when(String when) {
+            this.when = when;
+            return this;
+        }
 
-        Page(Entry... entries) {
-            this.entries = new ArrayList<>(List.of(entries));
+        public boolean isItemAction() {
+            return when.startsWith(WHEN_ITEM);
+        }
+
+        public boolean isSpell() {
+            return GROUP_SPELLS.equals(group);
         }
     }
 
@@ -105,14 +141,12 @@ public final class BarConfig {
         return instance;
     }
 
-    /** Loads the file if it is new or was edited since the last load, so tweaks apply on the next inventory open. */
+    /** Loads the file if it is new or was edited since the last load, so hand edits apply on the next inventory open. */
     public static void refresh() {
         try {
             if (!Files.exists(PATH)) {
                 instance = new BarConfig();
-                Files.createDirectories(PATH.getParent());
-                Files.writeString(PATH, GSON.toJson(instance));
-                loadedAt = Files.getLastModifiedTime(PATH);
+                save();
                 return;
             }
             FileTime modified = Files.getLastModifiedTime(PATH);
@@ -126,27 +160,30 @@ public final class BarConfig {
         }
     }
 
-    /** Explicit JSON nulls would otherwise survive Gson and blow up at render time. */
-    private BarConfig sanitized() {
-        if (pinned == null) pinned = new ArrayList<>();
-        if (pages == null) pages = new ArrayList<>();
-        if (itemHover == null) itemHover = new ArrayList<>();
-        pages.removeIf(page -> page == null);
-        for (Page page : pages) {
-            if (page.entries == null) page.entries = new ArrayList<>();
-            clean(page.entries);
+    public static void save() {
+        try {
+            Files.createDirectories(PATH.getParent());
+            Files.writeString(PATH, GSON.toJson(instance.sanitized()));
+            loadedAt = Files.getLastModifiedTime(PATH);
+        } catch (IOException e) {
+            WowKeybindHelper.LOGGER.error("Could not save {}", PATH, e);
         }
-        clean(pinned);
-        clean(itemHover);
-        if (!(scale > 0)) scale = 1.0f;
-        return this;
     }
 
-    private static void clean(List<Entry> entries) {
-        entries.removeIf(entry -> entry == null || entry.keys == null);
-        for (Entry entry : entries) {
+    /** Explicit JSON nulls and nonsense numbers would otherwise survive Gson and blow up at render time. */
+    private BarConfig sanitized() {
+        if (keybinds == null) keybinds = new ArrayList<>();
+        keybinds.removeIf(entry -> entry == null);
+        for (Entry entry : keybinds) {
             if (entry.label == null) entry.label = "";
+            if (entry.group == null) entry.group = "";
+            if (entry.when == null) entry.when = "";
+            if (entry.keys == null) entry.keys = new ArrayList<>();
             entry.keys.removeIf(key -> key == null);
         }
+        if (spellBar == null) spellBar = SpellBar.TOP;
+        if (!(scale > 0)) scale = 1.0f;
+        barSlots = Math.clamp(barSlots, 1, 12);
+        return this;
     }
 }

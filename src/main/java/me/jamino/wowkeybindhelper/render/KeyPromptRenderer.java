@@ -101,6 +101,28 @@ public final class KeyPromptRenderer {
         g.fill(x0, y0, x1, y1, argb);
     }
 
+    public static void scissor(GuiGraphics g, int x0, int y0, int x1, int y1) {
+        g.enableScissor(x0, y0, x1, y1);
+    }
+
+    public static void endScissor(GuiGraphics g) {
+        g.disableScissor();
+    }
+
+    /** Everything drawn after this sits above everything drawn before it. */
+    public static void raise(GuiGraphics g) {
+        g.nextStratum();
+    }
+
+    /** Draws {@code body} scaled about the point (x, y), which becomes its origin. */
+    public static void scaled(GuiGraphics g, float x, float y, float scale, Runnable body) {
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(scale, scale);
+        body.run();
+        g.pose().popMatrix();
+    }
+
     public static int argb(int alpha, int rgb) {
         return (Math.clamp(alpha, 0, 255) << 24) | (rgb & 0xFFFFFF);
     }
