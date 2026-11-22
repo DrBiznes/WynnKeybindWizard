@@ -2,11 +2,13 @@ package me.jamino.wynnkeybindwizard;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import me.jamino.wynnkeybindwizard.config.BarConfig;
+import me.jamino.wynnkeybindwizard.render.WynnKeyArt;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
@@ -14,6 +16,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +36,11 @@ public final class WynnKeybindWizard implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         BarConfig.refresh();
+
+        // Picks up Wynncraft's key art whenever its server pack is applied or removed.
+        ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(
+                Identifier.fromNamespaceAndPath(MOD_ID, "key_art"),
+                (ResourceManagerReloadListener) WynnKeyArt::reload);
 
         openKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.wynnkeybindwizard.all_keybinds", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y,

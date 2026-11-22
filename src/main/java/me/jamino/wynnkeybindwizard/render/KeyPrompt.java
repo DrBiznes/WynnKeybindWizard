@@ -6,12 +6,10 @@ import java.util.Map;
 
 /**
  * What to draw for a physical key: either a keycap carrying {@code text}, or one of the mouse
- * icons ({@code mouseIcon} 1-3 = left, right, middle). Text only uses characters that exist in
- * glyphs.png; the lower-case letters u/d/l/r are that sheet's arrow glyphs.
+ * icons ({@code mouseIcon} 1-3 = left, right, middle). Text is upper-case printable ASCII, which
+ * Wynncraft's keycap font covers in full.
  */
 public record KeyPrompt(String text, int mouseIcon) {
-    /** Every character glyphs.png can draw. */
-    private static final String GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`-=+[]\\/;',.*?!:<>_#udlr";
     private static final int MAX_CHARS = 6;
 
     private static final String KEYBOARD = "key.keyboard.";
@@ -28,7 +26,7 @@ public record KeyPrompt(String text, int mouseIcon) {
             Map.entry("page.up", "PGUP"), Map.entry("page.down", "PGDN"),
             Map.entry("caps.lock", "CAPS"), Map.entry("num.lock", "NUM"), Map.entry("scroll.lock", "SCRL"),
             Map.entry("print.screen", "PRT"), Map.entry("pause", "PAUSE"), Map.entry("menu", "MENU"),
-            Map.entry("up", "u"), Map.entry("down", "d"), Map.entry("left", "l"), Map.entry("right", "r"),
+            Map.entry("up", "UP"), Map.entry("down", "DOWN"), Map.entry("left", "LEFT"), Map.entry("right", "RIGHT"),
             Map.entry("keypad.add", "N+"), Map.entry("keypad.subtract", "N-"),
             Map.entry("keypad.multiply", "N*"), Map.entry("keypad.divide", "N/"),
             Map.entry("keypad.decimal", "N."), Map.entry("keypad.enter", "NENT"),
@@ -77,17 +75,16 @@ public record KeyPrompt(String text, int mouseIcon) {
         return new KeyPrompt(text, 0);
     }
 
-    /** Upper-cases and drops anything the glyph sheet cannot draw. */
+    /** Upper-cases and drops anything outside printable ASCII. */
     private static String sanitize(String raw) {
         StringBuilder out = new StringBuilder();
         for (char c : raw.toUpperCase(Locale.ROOT).toCharArray()) {
-            // Upper-casing means the arrow slots (u/d/l/r) can never be hit by accident here.
             if (isDrawable(c) && out.length() < MAX_CHARS) out.append(c);
         }
         return out.isEmpty() ? "?" : out.toString();
     }
 
     private static boolean isDrawable(char c) {
-        return !Character.isLowerCase(c) && GLYPHS.indexOf(c) >= 0;
+        return c > ' ' && c <= '~' && !Character.isLowerCase(c);
     }
 }

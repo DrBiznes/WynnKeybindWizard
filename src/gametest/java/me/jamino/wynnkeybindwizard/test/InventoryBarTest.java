@@ -4,10 +4,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import me.jamino.wynnkeybindwizard.KeybindPanel;
 import me.jamino.wynnkeybindwizard.config.BarConfig;
 import me.jamino.wynnkeybindwizard.config.ClothConfigScreen;
 import me.jamino.wynnkeybindwizard.mixin.AbstractContainerScreenAccessor;
+import me.jamino.wynnkeybindwizard.render.WynnKeyArt;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -173,12 +176,48 @@ public class InventoryBarTest implements FabricClientGameTest {
             context.setScreen(() -> ClothConfigScreen.create(null, ClothConfigScreen.PAGE_ADD));
             context.waitTicks(10);
             context.takeScreenshot("11-add-keybind-after-save");
+
+            // Everything above used the text fallback. Given an unzipped copy of Wynncraft's resource
+            // pack (not shipped; -Dwynnkeybindwizard.wynncraftPack=<folder>), switch it on and
+            // check the prompts use its key art instead.
+            String wynncraftPack = System.getProperty("wynnkeybindwizard.wynncraftPack");
+            if (wynncraftPack != null) {
+                copyPack(Path.of(wynncraftPack),
+                        FabricLoader.getInstance().getGameDir().resolve("resourcepacks/wynncraft"));
+                context.setScreen(() -> null);
+                context.runOnClient(mc -> {
+                    mc.getResourcePackRepository().reload();
+                    List<String> packs = new ArrayList<>(mc.getResourcePackRepository().getSelectedIds());
+                    packs.add("file/wynncraft");
+                    mc.getResourcePackRepository().setSelected(packs);
+                    mc.reloadResourcePacks();
+                });
+                context.waitFor(mc -> mc.getOverlay() == null && WynnKeyArt.current() != null, 400);
+                writeConfig("\"spellBar\": \"TOP\"");
+                openInventory(context);
+                context.takeScreenshot("12-wynncraft-key-art");
+                context.getInput().pressKey(GLFW.GLFW_KEY_Y);
+                context.waitTicks(5);
+                context.takeScreenshot("13-wynncraft-key-art-popup");
+            }
         } finally {
             try {
                 Files.deleteIfExists(CONFIG);
             } catch (IOException ignored) {
                 // Only the throwaway test run directory is affected.
             }
+        }
+    }
+
+    private static void copyPack(Path from, Path to) {
+        try (var files = Files.walk(from)) {
+            for (Path file : (Iterable<Path>) files::iterator) {
+                Path target = to.resolve(from.relativize(file).toString());
+                if (Files.isDirectory(file)) Files.createDirectories(target);
+                else Files.copy(file, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

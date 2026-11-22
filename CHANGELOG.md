@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Key prompts are now drawn with **Wynncraft's own key art**, read from its resource pack while
+  it is loaded (on the server, or preloaded by Wynntils). Resource packs that reskin those keys
+  reskin the prompts too. The mod no longer ships any key textures: without Wynncraft's pack,
+  prompts are plain text keys. Arrow keys now read UP, DOWN, LEFT and RIGHT.
 - **WynnMod** support: its six chat hotkeys fill the custom command slots when Wynntils' custom
   commands are unbound, and Ping and Scan Party are in the popup.
 - **WynnExtras** support: entries can read keys from WynnExtras' own settings with
