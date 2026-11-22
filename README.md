@@ -1,8 +1,9 @@
 # Wynn Keybind Wizard
 
-Wynn Keybind Wizard shows the keybinds you actually have bound as live prompts around your Wynncraft
-inventory, so you never have to remember or look up a key. Rebind something and the prompts update
-straight away.
+Wynn Keybind Wizard is for Wynncraft modpack makers who want their players to actually know what the
+keybinds are. It shows the keys you have bound as live prompts around the inventory, so nobody has to
+dig through Controls to remember what `Y` does. Rebind something and the prompts update straight away.
+if you are not making a modpack Idk why you would use this!1!
 
 - **Bottom bar** with your most useful keybinds, plus an **All Keybinds** button (or press `Y`) that
   opens every keybind in a popup without closing the inventory.
@@ -19,16 +20,29 @@ is optional but recommended (spell names, item and mount awareness), and
 [Cloth Config](https://modrinth.com/mod/cloth-config) with [Mod Menu](https://modrinth.com/mod/modmenu)
 gives you the in-game settings screen.
 
-### Modpack creators
+> **Modpack creators:** You choose which keybinds show up, from any mod
+> in your pack, and ship the whole layout as a single config file. Setup, custom commands, adding other mods' keybinds and the
+> config reference are in the [modpack makers guide](https://github.com/DrBiznes/WynnKeybindWizard/blob/main/MODPACK_MAKERS.md).
 
-You choose which keybinds show up, from any mod in your pack, and ship the whole layout as a single
-config file. See the **[modpack makers guide](https://github.com/DrBiznes/WynnKeybindWizard/blob/main/MODPACK_MAKERS.md)**
-for setup, custom commands, adding other mods' keybinds and the config reference.
+## Support and My Mods
+Please report any bugs or feature suggestions on the Github Issues page, I'll be updating this frequently with community feedback and ideas! You can also [join my discord](https://discord.gg/jqFF64rXZZ) if you need direct support, or want to stay updated with all of my mods.
+### Check out all my projects!
+>   [World of Wynncraft Modpack](https://modrinth.com/modpack/world-of-wynncraft)
 
-### Building
+>   [WynnTitles](https://modrinth.com/mod/wynntitles)
 
-See [DEVELOPMENT.md](DEVELOPMENT.md).
+>   [WynnWanderer](https://modrinth.com/mod/wynnwanderer)
 
-### License
+>   [WynnPhoton](https://modrinth.com/mod/wynnphoton)
 
-MIT. See [LICENSE](LICENSE).
+>   [WynnVista](https://modrinth.com/mod/wynnvista)
+
+>   [Wynn Weapon Bigger](https://modrinth.com/mod/wynnweaponbigger)
+
+>   [Nimble ReWynnded](https://modrinth.com/mod/nimble-rewynnded)
+
+>   [Class Keybind Profiles](https://modrinth.com/mod/class-keybind-profiles)
+
+>   [WynnBubbles](https://modrinth.com/mod/wynnbubbles)
+
+>   [WynnLODGrabber](https://modrinth.com/mod/wynnlodgrabber)
