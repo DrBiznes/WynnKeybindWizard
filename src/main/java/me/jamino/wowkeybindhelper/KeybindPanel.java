@@ -15,6 +15,7 @@ import me.jamino.wowkeybindhelper.render.Prompts.Shown;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 /**
  * The All Keybinds popup: every configured keybind, grouped under headings, in as many columns
@@ -35,6 +36,17 @@ public final class KeybindPanel {
     private static final int BORDER = 0xFF2B1818;
     private static final int BORDER_LIGHT = 0xFF50352D;
     private static final int FILL = 0xF2161618;
+
+    /**
+     * Wynntils' own scalable menu background. Borrowing its path means whatever resource pack
+     * reskins Wynntils (e.g. WynnEdits Dark Theme) reskins this panel too. Without Wynntils
+     * installed the texture is missing and the flat colours above are used instead.
+     */
+    private static final Identifier WYNNTILS_BACKGROUND =
+            Identifier.fromNamespaceAndPath("wynntils", "textures/build_loadouts/scallable_widget_background.png");
+    private static final int BG_TEX_W = 34;
+    private static final int BG_TEX_H = 19;
+    private static final int BG_BORDER = 5;
     private static final int TITLE_COLOR = 0xFFD37F;
     private static final int HEADER_COLOR = 0xA8B4BC;
     private static final int SCROLLBAR = 0x80FFFFFF;
@@ -177,10 +189,14 @@ public final class KeybindPanel {
             KeyPromptRenderer.raise(g);
             KeyPromptRenderer.rect(g, 0, 0, screenWidth, screenHeight, DIM);
         }
-        KeyPromptRenderer.rect(g, x0 + 1, y0, x1 - 1, y1, BORDER);
-        KeyPromptRenderer.rect(g, x0, y0 + 1, x1, y1 - 1, BORDER);
-        KeyPromptRenderer.rect(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, BORDER_LIGHT);
-        KeyPromptRenderer.rect(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, FILL);
+        if (KeyPromptRenderer.exists(WYNNTILS_BACKGROUND)) {
+            KeyPromptRenderer.nineSlice(g, WYNNTILS_BACKGROUND, BG_TEX_W, BG_TEX_H, BG_BORDER, x0, y0, x1, y1);
+        } else {
+            KeyPromptRenderer.rect(g, x0 + 1, y0, x1 - 1, y1, BORDER);
+            KeyPromptRenderer.rect(g, x0, y0 + 1, x1, y1 - 1, BORDER);
+            KeyPromptRenderer.rect(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, BORDER_LIGHT);
+            KeyPromptRenderer.rect(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, FILL);
+        }
 
         String title = title();
         KeyPromptRenderer.text(g, font, title, (screenWidth - font.width(title)) / 2, y0 + PAD - 1, TITLE_COLOR, 255);

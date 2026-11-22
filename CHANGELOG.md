@@ -8,6 +8,8 @@
   in the All Keybinds popup.
 - Item actions now use `onBar` like other keybinds, and the settings screen has an Item Actions page
   to pick them. Older config files are updated automatically when they load.
+- The All Keybinds popup now uses Wynntils' menu background, so resource packs that reskin Wynntils
+  (like WynnEdits Dark Theme) reskin the popup too. Without Wynntils it keeps the old flat look.
 
 ## 0.3.0
 

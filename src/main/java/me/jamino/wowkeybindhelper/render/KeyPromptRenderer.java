@@ -1,6 +1,7 @@
 package me.jamino.wowkeybindhelper.render;
 
 import me.jamino.wowkeybindhelper.WowKeybindHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -89,6 +90,38 @@ public final class KeyPromptRenderer {
                 g.blit(RenderPipelines.GUI_TEXTURED, GLYPHS, gx + i * GLYPH_CELL_W, gy,
                         (index % GLYPH_COLS) * GLYPH_CELL_W, (index / GLYPH_COLS) * GLYPH_CELL_H,
                         GLYPH_W, GLYPH_H, GLYPH_TEX_W, GLYPH_TEX_H, tint);
+            }
+        }
+    }
+
+    /** True when some loaded mod or resource pack provides {@code texture}. */
+    public static boolean exists(Identifier texture) {
+        return Minecraft.getInstance().getResourceManager().getResource(texture).isPresent();
+    }
+
+    /**
+     * Stretches a plain (non-atlas) texture over the box as a nine-slice: corners kept as they are,
+     * edges and middle stretched. {@code border} is the corner size in texture pixels.
+     */
+    public static void nineSlice(GuiGraphics g, Identifier texture, int texW, int texH, int border,
+                                 int x0, int y0, int x1, int y1) {
+        int b = border;
+        int w = x1 - x0, h = y1 - y0;
+        int innerW = w - b * 2, innerH = h - b * 2;
+        int texInnerW = texW - b * 2, texInnerH = texH - b * 2;
+        int[] dx = {x0, x0 + b, x1 - b};
+        int[] dw = {b, innerW, b};
+        int[] u = {0, b, texW - b};
+        int[] uw = {b, texInnerW, b};
+        int[] dy = {y0, y0 + b, y1 - b};
+        int[] dh = {b, innerH, b};
+        int[] v = {0, b, texH - b};
+        int[] vh = {b, texInnerH, b};
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                if (dw[col] <= 0 || dh[row] <= 0) continue;
+                g.blit(RenderPipelines.GUI_TEXTURED, texture, dx[col], dy[row], u[col], v[row],
+                        dw[col], dh[row], uw[col], vh[row], texW, texH);
             }
         }
     }
