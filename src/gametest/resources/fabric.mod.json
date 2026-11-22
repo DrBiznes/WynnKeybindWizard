@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "wowkeybindhelper-test",
+  "version": "1.0.0",
+  "name": "WoW Keybind Helper Tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "me.jamino.wowkeybindhelper.test.InventoryBarTest"
+    ]
+  },
+  "depends": {
+    "wowkeybindhelper": "*"
+  }
+}
