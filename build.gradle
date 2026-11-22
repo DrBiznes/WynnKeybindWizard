@@ -27,6 +27,37 @@ fabricApi {
 	}
 }
 
+// gradlew checkModKeys [-PmodsDir=<pack mods folder>] [-Pconfig=<wynnkeybindwizard.json>]
+// Run by hand when the supported mods update. Checks every keybind id in the layout against the
+// newest release of each mod on Modrinth (see src/modcheck), then compiles the Wynntils
+// integration against the newest Wynntils. Only then does the build reach out to Modrinth.
+def checkingMods = gradle.startParameter.taskNames.any { it == 'checkModKeys' || it.endsWith(':checkModKeys') }
+
+def newestModrinthVersion(String slug) {
+	def query = URLEncoder.encode("[\"${project.minecraft_version}\"]", 'UTF-8')
+	def connection = new URL("https://api.modrinth.com/v2/project/${slug}/version?game_versions=${query}&loaders=%5B%22fabric%22%5D").openConnection()
+	connection.setRequestProperty('User-Agent', 'wynnkeybindwizard-modcheck')
+	def versions = new groovy.json.JsonSlurper().parse(connection.inputStream)
+	if (versions.isEmpty()) throw new GradleException("No ${slug} release for Minecraft ${project.minecraft_version} on Modrinth")
+	return versions.max { it.date_published }
+}
+
+sourceSets {
+	modcheck {
+		compileClasspath += main.output + main.compileClasspath
+		runtimeClasspath += main.output + main.compileClasspath
+	}
+	// The Wynntils integration again, compiled against the newest Wynntils instead of the pinned one.
+	wynntilsLatest {
+		java {
+			srcDirs = ['src/main/java']
+			include 'me/jamino/wynnkeybindwizard/compat/**'
+		}
+		compileClasspath += main.output + main.compileClasspath.filter { !it.path.contains('wynntils') }
+	}
+}
+loom.createRemapConfigurations(sourceSets.wynntilsLatest)
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	// Official Mojang names on purpose: 26.x ships unobfuscated with these same names,
@@ -37,6 +68,11 @@ dependencies {
 
 	// Optional integrations: compiled against, never bundled or required at runtime.
 	modCompileOnly "maven.modrinth:wynntils:${project.wynntils_version}"
+	if (checkingMods) {
+		def newest = newestModrinthVersion('wynntils')
+		logger.lifecycle("checkModKeys: compiling the Wynntils integration against Wynntils ${newest.version_number}")
+		modWynntilsLatestCompileOnly "maven.modrinth:wynntils:${newest.id}"
+	}
 
 	// Cloth Config + Mod Menu together provide the settings screen. Present in the dev client.
 	modCompileOnly modLocalRuntime("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
@@ -69,4 +105,16 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archives_base_name}" }
 	}
+}
+
+tasks.register('checkModKeys', JavaExec) {
+	group = 'verification'
+	description = 'Checks the layout keybind ids against the newest release of each supported mod.'
+	classpath = sourceSets.modcheck.runtimeClasspath
+	mainClass = 'me.jamino.wynnkeybindwizard.modcheck.ModKeyCheck'
+	args project.minecraft_version, layout.buildDirectory.dir('modcheck').get().asFile.path
+	if (project.hasProperty('modsDir')) args '--mods', project.property('modsDir')
+	if (project.hasProperty('config')) args '--config', project.property('config')
+	// Runs even when ids are missing, so one run reports both.
+	finalizedBy 'compileWynntilsLatestJava'
 }

@@ -20,7 +20,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public final class WynnExtrasKeys {
     public static final String PREFIX = "wynnextras:";
-    private static final String CONFIG_CLASS = "julianh06.wynnextras.config.WynnExtrasConfig";
+    public static final String CONFIG_CLASS = "julianh06.wynnextras.config.WynnExtrasConfig";
 
     private static boolean available = FabricLoader.getInstance().isModLoaded("wynnextras");
     private static Field instanceField;

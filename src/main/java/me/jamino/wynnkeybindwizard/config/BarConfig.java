@@ -23,7 +23,7 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class BarConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindwizard.json");
+    private static final String FILE_NAME = "wynnkeybindwizard.json";
 
     /** Where the spell keys are shown on the inventory. They are always in the popup. */
     public enum SpellBar { TOP, BOTTOM, OFF }
@@ -196,36 +196,43 @@ public final class BarConfig {
         return slot >= 1 && slot <= customCommands.size() ? customCommands.get(slot - 1) : "";
     }
 
+    /** Looked up on use, not at class load, so the defaults can be read outside the game (the mod key check). */
+    private static Path path() {
+        return FabricLoader.getInstance().getConfigDir().resolve(FILE_NAME);
+    }
+
     public static BarConfig get() {
         return instance;
     }
 
     /** Loads the file if it is new or was edited since the last load, so hand edits apply on the next inventory open. */
     public static void refresh() {
+        Path path = path();
         try {
-            if (!Files.exists(PATH)) {
+            if (!Files.exists(path)) {
                 instance = new BarConfig();
                 save();
                 return;
             }
-            FileTime modified = Files.getLastModifiedTime(PATH);
+            FileTime modified = Files.getLastModifiedTime(path);
             if (modified.equals(loadedAt)) return;
             loadedAt = modified;
-            BarConfig loaded = GSON.fromJson(Files.readString(PATH), BarConfig.class);
+            BarConfig loaded = GSON.fromJson(Files.readString(path), BarConfig.class);
             if (loaded != null) instance = loaded.sanitized();
         } catch (IOException | RuntimeException e) {
             // Bad JSON or an unreadable file: keep whatever was working before.
-            WynnKeybindWizard.LOGGER.error("Could not load {}, keeping previous settings", PATH, e);
+            WynnKeybindWizard.LOGGER.error("Could not load {}, keeping previous settings", path, e);
         }
     }
 
     public static void save() {
+        Path path = path();
         try {
-            Files.createDirectories(PATH.getParent());
-            Files.writeString(PATH, GSON.toJson(instance.sanitized()));
-            loadedAt = Files.getLastModifiedTime(PATH);
+            Files.createDirectories(path.getParent());
+            Files.writeString(path, GSON.toJson(instance.sanitized()));
+            loadedAt = Files.getLastModifiedTime(path);
         } catch (IOException e) {
-            WynnKeybindWizard.LOGGER.error("Could not save {}", PATH, e);
+            WynnKeybindWizard.LOGGER.error("Could not save {}", path, e);
         }
     }
 
