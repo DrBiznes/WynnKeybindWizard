@@ -3,9 +3,15 @@
   "id": "wynnkeybindhelper",
   "version": "${version}",
   "name": "Wynn Keybind Helper",
-  "description": "A live bar of key prompts under the inventory for the World of Wynncraft modpack.",
+  "description": "Shows your Wynncraft keybinds as live key prompts around the inventory, plus an All Keybinds popup. Built for modpack makers: pick which mods' keybinds to show, name your Wynntils custom commands, and ship the layout in one config file.",
   "authors": ["DrBiznes"],
-  "license": "All-Rights-Reserved",
+  "contact": {
+    "homepage": "https://github.com/DrBiznes/WynnKeybindHelper",
+    "sources": "https://github.com/DrBiznes/WynnKeybindHelper",
+    "issues": "https://github.com/DrBiznes/WynnKeybindHelper/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/wynnkeybindhelper/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["me.jamino.wynnkeybindhelper.WynnKeybindHelper"],

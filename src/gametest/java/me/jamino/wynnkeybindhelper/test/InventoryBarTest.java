@@ -34,8 +34,9 @@ public class InventoryBarTest implements FabricClientGameTest {
                 {"label": "$spell4", "group": "Spells", "keys": ["key.mouse.4"]},
                 {"label": "Ultimate", "group": "Spells", "keys": ["key.swapOffhand"]},
                 {"label": "Quest Book", "group": "Menus", "keys": ["key.keyboard.j"], "onBar": true},
-                {"label": "Party Finder", "group": "Menus", "keys": ["key.keyboard.p"], "onBar": true},
-                {"label": "Use Menu", "group": "Menus", "keys": ["key.keyboard.u"], "onBar": true},
+                {"label": "$command1", "group": "Commands", "keys": ["key.keyboard.p"], "onBar": true},
+                {"label": "$command2", "group": "Commands", "keys": ["key.keyboard.u"], "onBar": true},
+                {"label": "$command3", "group": "Commands", "keys": ["key.keyboard.i"], "onBar": true},
                 {"label": "Mount", "group": "World", "keys": ["key.keyboard.h"], "onBar": true, "when": "has_mount"},
                 {"label": "Social", "group": "Menus", "keys": ["key.keyboard.o"], "onBar": true},
                 {"label": "Not Installed", "group": "Menus", "keys": ["not.installed.mod"], "onBar": true},
@@ -144,10 +145,34 @@ public class InventoryBarTest implements FabricClientGameTest {
             }
             context.takeScreenshot("6-hotkey-in-world-does-nothing");
 
-            // The Cloth Config screen builds and opens.
+            // The Cloth Config screen builds and opens, including the custom command and add pages.
             context.setScreen(() -> ClothConfigScreen.create(null));
             context.waitTicks(10);
             context.takeScreenshot("7-settings-screen");
+            context.setScreen(() -> ClothConfigScreen.create(null, ClothConfigScreen.PAGE_COMMANDS));
+            context.waitTicks(10);
+            context.takeScreenshot("8-settings-custom-commands");
+            context.setScreen(() -> ClothConfigScreen.create(null, ClothConfigScreen.PAGE_ADD));
+            context.waitTicks(10);
+            context.takeScreenshot("9-settings-add-keybind");
+
+            // Search the keybind picker for Jump and screenshot the list it offers.
+            click(context, 1017, 311);
+            context.getInput().typeChars("jump");
+            context.waitTicks(5);
+            context.takeScreenshot("10-add-keybind-search");
+
+            // Pick it, leave the label empty (so it uses the Controls name) and save.
+            click(context, 1000, 343);
+            click(context, 837, 687);
+            context.waitTicks(5);
+            boolean added = context.computeOnClient(mc -> BarConfig.get().keybinds.stream()
+                    .anyMatch(e -> e.keys.equals(java.util.List.of("key.jump")) && e.label.equals("Jump")
+                            && e.group.equals("Other")));
+            if (!added) throw new AssertionError("Add Keybind did not add Jump to the config");
+            context.setScreen(() -> ClothConfigScreen.create(null, ClothConfigScreen.PAGE_ADD));
+            context.waitTicks(10);
+            context.takeScreenshot("11-add-keybind-after-save");
         } finally {
             try {
                 Files.deleteIfExists(CONFIG);
@@ -155,6 +180,13 @@ public class InventoryBarTest implements FabricClientGameTest {
                 // Only the throwaway test run directory is affected.
             }
         }
+    }
+
+    /** Left-click at a window pixel (the screenshots are window-sized). */
+    private static void click(ClientGameTestContext context, double x, double y) {
+        context.getInput().setCursorPos(x, y);
+        context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+        context.waitTicks(3);
     }
 
     private static void clickSpellToggle(ClientGameTestContext context) {
@@ -177,7 +209,9 @@ public class InventoryBarTest implements FabricClientGameTest {
 
     private static void writeConfig(String settings) {
         try {
-            Files.writeString(CONFIG, "{\n  " + settings + ",\n" + KEYBINDS + "}\n");
+            // Slot 3 is bound but left unnamed, so it must stay hidden.
+            Files.writeString(CONFIG, "{\n  " + settings + ",\n  \"customCommands\": [\"Party Finder\", \"Use Menu\"],\n"
+                    + KEYBINDS + "}\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

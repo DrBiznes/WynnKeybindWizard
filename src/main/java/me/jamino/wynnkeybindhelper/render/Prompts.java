@@ -29,10 +29,20 @@ public final class Prompts {
 
     private Prompts() {}
 
-    /** Null when the entry should be hidden: its keybind does not exist or is unbound. */
+    /** Null when the entry should be hidden: its keybind does not exist or is unbound, or it is an unused custom command. */
     public static Shown resolve(BarConfig.Entry entry, Font font) {
+        String label = label(entry);
+        if (label == null) return null;
         InputConstants.Key key = boundKey(entry);
-        return key == null ? null : of(key, WynnInfo.label(entry.label), font);
+        return key == null ? null : of(key, label, font);
+    }
+
+    /** The text shown beside the key, with placeholders filled in; null for a custom command slot the pack left empty. */
+    public static String label(BarConfig.Entry entry) {
+        int slot = entry.commandSlot();
+        if (slot == 0) return WynnInfo.label(entry.label);
+        String text = BarConfig.get().customCommand(slot);
+        return text.isEmpty() ? null : text;
     }
 
     public static Shown of(InputConstants.Key key, String label, Font font) {

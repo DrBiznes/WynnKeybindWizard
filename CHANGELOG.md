@@ -4,6 +4,12 @@
 
 - Renamed to **Wynn Keybind Helper**. The mod id is now `wynnkeybindhelper`, so the config file is
   `config/wynnkeybindhelper.json` and the jar is `wynnkeybindhelper-<version>.jar`.
+- Now MIT licensed, with an icon and project links, ready to be used in any Wynncraft modpack.
+- Wynntils' six custom command keybinds are built in. Name them on the new **Custom Commands**
+  settings page (or `customCommands` in the file) and they show up with that label; unnamed slots
+  are hidden. This replaces the hard-coded Party Finder and Use Menu entries.
+- New **Add Keybind** settings page: pick any keybind from any installed mod, give it a label and
+  heading, and it joins the bar and popup. Added keybinds can be removed from the same page.
 - The Background switch is now a **Background opacity** slider (`backgroundOpacity`, 0-100). At 0
   the bars show just the keys with no box behind them.
 - Hovering an item now shows at most 5 actions (new `itemSlots` setting, "Item actions on the bar"

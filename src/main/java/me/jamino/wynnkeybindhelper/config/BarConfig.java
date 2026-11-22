@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -34,6 +35,15 @@ public final class BarConfig {
     public static final String WHEN_ITEM_GEAR = "item_gear";
 
     public static final String GROUP_SPELLS = "Spells";
+    public static final String GROUP_COMMANDS = "Commands";
+
+    /** Wynntils' "Execute Nth Custom Command" keybinds, in slot order. */
+    public static final List<String> CUSTOM_COMMAND_KEYS = List.of(
+            "wynntils.keybind.customCommandOne", "wynntils.keybind.customCommandTwo",
+            "wynntils.keybind.customCommandThree", "wynntils.keybind.customCommandFour",
+            "wynntils.keybind.customCommandFive", "wynntils.keybind.customCommandSix");
+    /** Entry label that stands for the text in {@link #customCommands}; {@code $command1}..{@code $command6}. */
+    private static final String COMMAND_TOKEN = "$command";
 
     private static final String LOCK_FALLBACK = "key.mouse.middle";
     private static final String SCREENSHOT_KEY = "wynntils.keybind.screenshotItem";
@@ -62,6 +72,12 @@ public final class BarConfig {
     public int backgroundOpacity = 78;
     /** Draw a key in its red "pressed" style while it is physically held down. */
     public boolean showHeldKeys = true;
+    /**
+     * What each of Wynntils' six custom command keybinds does in this pack ("Party Finder"),
+     * shown as the label of the {@code $command1}..{@code $command6} entries. An empty label
+     * hides that slot, so unused slots never show up.
+     */
+    public List<String> customCommands = new ArrayList<>(Collections.nCopies(CUSTOM_COMMAND_KEYS.size(), ""));
 
     public List<Entry> keybinds = new ArrayList<>(List.of(
             new Entry("$spell1", GROUP_SPELLS, "wynntils.keybind.castFirstSpell"),
@@ -71,12 +87,16 @@ public final class BarConfig {
             new Entry("Ultimate", GROUP_SPELLS, "key.swapOffhand"),
 
             new Entry("Quest Book", "Menus", "wynntils.keybind.openContentBook").onBar(),
-            new Entry("Party Finder", "Menus", "wynntils.keybind.customCommandOne").onBar(),
-            new Entry("Use Menu", "Menus", "wynntils.keybind.customCommandTwo").onBar(),
+            new Entry("$command1", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(0)).onBar(),
+            new Entry("$command2", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(1)).onBar(),
+            new Entry("$command3", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(2)).onBar(),
+            new Entry("$command4", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(3)).onBar(),
+            new Entry("$command5", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(4)).onBar(),
+            new Entry("$command6", GROUP_COMMANDS, CUSTOM_COMMAND_KEYS.get(5)).onBar(),
             new Entry("Mount", "World", "wynntils.keybind.mountHorse").onBar().when(WHEN_HAS_MOUNT),
             new Entry("Social", "Menus", "wynntils.keybind.openPartyManagement").onBar(),
             new Entry("Item Guide", "Menus", "wynntils.keybind.openGuidesList").onBar(),
-            // Seventh in line: only reaches the bar when something above it is hidden.
+            // Only reaches the bar when something above it is hidden or unlabelled.
             new Entry("Lootpools", "Menus", "key.wynnventory.openRewardScreen").onBar(),
             new Entry("Achievements", "Menus", "key.wynntitles.open"),
             new Entry("Ingredient Pouch", "Menus", "wynntils.keybind.openIngredientPouch"),
@@ -112,7 +132,8 @@ public final class BarConfig {
      *
      * <p>{@code when} is empty for "always", {@code has_mount}, or one of the item conditions
      * ({@code item}, {@code item_stats}, {@code item_gear}); item entries with {@code onBar} are
-     * what the bar shows while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names.
+     * what the bar shows while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names,
+     * and {@code $command1}..{@code $command6} become the matching {@link #customCommands} text.
      */
     public static final class Entry {
         public String label = "";
@@ -123,18 +144,18 @@ public final class BarConfig {
 
         public Entry() {}
 
-        Entry(String label, String group, String... keys) {
+        public Entry(String label, String group, String... keys) {
             this.label = label;
             this.group = group;
             this.keys = new ArrayList<>(List.of(keys));
         }
 
-        Entry onBar() {
+        public Entry onBar() {
             this.onBar = true;
             return this;
         }
 
-        Entry when(String when) {
+        public Entry when(String when) {
             this.when = when;
             return this;
         }
@@ -146,6 +167,18 @@ public final class BarConfig {
         public boolean isSpell() {
             return GROUP_SPELLS.equals(group);
         }
+
+        /** 1-6 when the label is a {@code $commandN} placeholder, else 0. */
+        public int commandSlot() {
+            if (label.length() != COMMAND_TOKEN.length() + 1 || !label.startsWith(COMMAND_TOKEN)) return 0;
+            int slot = label.charAt(COMMAND_TOKEN.length()) - '0';
+            return slot >= 1 && slot <= CUSTOM_COMMAND_KEYS.size() ? slot : 0;
+        }
+    }
+
+    /** The pack's text for custom command slot 1-6, or "" when that slot is unused. */
+    public String customCommand(int slot) {
+        return slot >= 1 && slot <= customCommands.size() ? customCommands.get(slot - 1) : "";
     }
 
     public static BarConfig get() {
@@ -192,6 +225,10 @@ public final class BarConfig {
             if (entry.keys == null) entry.keys = new ArrayList<>();
             entry.keys.removeIf(key -> key == null);
         }
+        if (customCommands == null) customCommands = new ArrayList<>();
+        customCommands.replaceAll(text -> text == null ? "" : text.strip());
+        while (customCommands.size() < CUSTOM_COMMAND_KEYS.size()) customCommands.add("");
+        while (customCommands.size() > CUSTOM_COMMAND_KEYS.size()) customCommands.removeLast();
         if (spellBar == null) spellBar = SpellBar.TOP;
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);

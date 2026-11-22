@@ -1,7 +1,9 @@
 # Wynn Keybind Helper
 
-Live key prompts around the inventory, for the World of Wynncraft modpack (Fabric 1.21.11).
-Not published on its own.
+Live key prompts around the inventory for Wynncraft (Fabric 1.21.11). Built for modpack makers: you
+choose which keybinds show up, from Wynntils and from any other mod in your pack, and ship the layout
+as one config file. Players see the keys they actually have bound, and rebinding updates the prompts
+straight away.
 
 - **Bottom bar**: a short row of the most important keybinds under the inventory, ending in an
   **All Keybinds** button.
@@ -16,25 +18,77 @@ Not published on its own.
   tell items apart; without it every item action is offered.
 - **Live**: every prompt is read from the game's keybinds each frame, so rebinding in Controls or a
   Class Keybind Profiles switch shows up immediately. A key is drawn red while physically held.
+- **Missing mods are fine**: an entry whose mod is not installed, or whose key is unbound, is hidden
+  everywhere. The defaults cover Wynntils, Wynnventory, WynnTitles, Nimble ReWynnded, Zoomify and
+  Iris, and only the ones present show up.
 
-## Configuring
+Requires Fabric API. Optional: Wynntils (spell names, item and mount awareness), Cloth Config and
+Mod Menu (the in-game settings screen).
 
-`config/wynnkeybindhelper.json` is written on first launch and re-read every time a container screen
-opens, so edits apply without a restart. Ship it in the pack to set the layout. With Cloth Config
-and Mod Menu installed (both optional) the same settings, and which keybinds go on the bar, can be
-changed in game; adding new keybind entries is done in the file.
+## For modpack makers
+
+1. Install the mod and launch once. `config/wynnkeybindhelper.json` is written with the default layout.
+2. Set the layout in game (Mod Menu > Wynn Keybind Helper, needs Cloth Config) or in the file. The file
+   is re-read every time a container screen opens, so edits apply without a restart.
+3. Ship `config/wynnkeybindhelper.json` in your pack.
+
+Players can change the same settings in game. A pack update that ships the file again replaces
+their changes, as with any config a pack ships.
+
+### Wynntils custom commands
+
+Wynntils has six **Custom Command Keybinds** that run a command you choose (set under Wynntils >
+Custom Command Keybinds). What they do differs per pack, so name them on the **Custom Commands**
+page of the settings screen, or in the file:
+
+```json
+"customCommands": ["Party Finder", "Use Menu", "", "", "", ""]
+```
+
+Each name is the label for that slot's key on the bar and in the popup. Empty slots are hidden.
+The slots are the `$command1`..`$command6` entries in `keybinds`, under the `Commands` heading;
+move or regroup them like any other entry.
+
+### Adding another mod's keybind
+
+**In game:** open the **Add Keybind** page, pick the keybind from the list (every keybind in
+Controls, with the mod it belongs to; type to search), give it a label and a heading, choose whether
+it is an item action or a bar candidate, and Save. Keybinds added this way are listed on the same
+page with a Remove switch.
+
+**In the file:** find the keybind's id in `options.txt`. It is the part after `key_`, so
+`key_wynnventory.openRewardScreen:key.keyboard.n` is `wynnventory.openRewardScreen`. Add an entry:
+
+```json
+{"label": "Lootpools", "group": "Menus", "keys": ["wynnventory.openRewardScreen"], "onBar": true}
+```
+
+Players without that mod never see the entry.
+
+## Config reference
+
+| setting | meaning |
+| --- | --- |
+| `enabled` | Turns the bars off without uninstalling. |
+| `showOnAllContainers` | Also show under chests, banks and other container screens, not just the inventory. |
+| `barSlots` | How many keybinds the bottom bar holds (the All Keybinds button is extra). |
+| `itemSlots` | How many item actions the bar holds while an item is hovered. |
+| `spellBar` | `TOP`, `BOTTOM` or `OFF` (popup only). |
+| `dynamic` | Item actions while hovering, and hiding keybinds you cannot use yet. |
+| `offsetY`, `scale`, `backgroundOpacity` | Gap from the inventory, size, and darkness (0-100) of the box behind the bars. |
+| `showHeldKeys` | Draw a key red while it is held down. |
+| `customCommands` | Names for Wynntils' six custom command keybinds; see above. |
+| `keybinds` | Everything the mod shows; see below. |
 
 `keybinds` is one list. Its order is the priority order for the bar. Each entry:
 
 | field | meaning |
 | --- | --- |
-| `label` | Text beside the key. `$spell1`..`$spell4` become spell names. |
+| `label` | Text beside the key. `$spell1`..`$spell4` become spell names, `$command1`..`$command6` the `customCommands` names. |
 | `keys` | Tried in order. A keybind id exactly as it appears after `key_` in `options.txt`, or a physical key such as `key.keyboard.f3` for a fixed prompt. |
 | `group` | Heading in the popup. `Spells` is special: those entries are the spell bar. |
-| `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots` (default 5); unpicked ones stay in the popup. |
+| `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots`; unpicked ones stay in the popup. |
 | `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`) which makes it an item action. |
-
-An entry whose keybind does not exist (mod not installed) or is unbound is hidden everywhere.
 
 ## Building and testing
 
@@ -54,3 +108,7 @@ remap to do. Expected work:
   and `KeyEvent`/`MouseButtonEvent`; their signatures changed in 1.21.11 and may again.
 - `WynntilsCompat` needs a 26.x Wynntils to compile against, and Cloth Config / Mod Menu need 26.x
   builds for the settings screen; the mod runs without any of them.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
