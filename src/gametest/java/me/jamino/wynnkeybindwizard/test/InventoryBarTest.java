@@ -246,7 +246,7 @@ public class InventoryBarTest implements FabricClientGameTest {
         context.waitTicks(10);
     }
 
-    private static void writeConfig(String settings) {
+    static void writeConfig(String settings) {
         try {
             // Slot 3 is bound but left unnamed, so it must stay hidden.
             Files.writeString(CONFIG, "{\n  " + settings + ",\n  \"customCommands\": [\"Party Finder\", \"Use Menu\"],\n"
@@ -256,7 +256,7 @@ public class InventoryBarTest implements FabricClientGameTest {
         }
     }
 
-    private static void bind(String mapping, String key) {
+    static void bind(String mapping, String key) {
         KeyMapping.get(mapping).setKey(InputConstants.getKey(key));
         KeyMapping.resetMapping();
     }

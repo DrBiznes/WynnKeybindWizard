@@ -29,7 +29,8 @@ public record KeyPrompt(String text, int mouseIcon) {
             Map.entry("up", "UP"), Map.entry("down", "DOWN"), Map.entry("left", "LEFT"), Map.entry("right", "RIGHT"),
             Map.entry("keypad.add", "N+"), Map.entry("keypad.subtract", "N-"),
             Map.entry("keypad.multiply", "N*"), Map.entry("keypad.divide", "N/"),
-            Map.entry("keypad.decimal", "N."), Map.entry("keypad.enter", "NENT"),
+            // Wynntils binds Hold to Compare to numpad Enter by default; "NENT" read as a typo.
+            Map.entry("keypad.decimal", "N."), Map.entry("keypad.enter", "ENTER"),
             Map.entry("keypad.equal", "N="));
 
     /** US-layout fallback for punctuation when the OS cannot name the key. */

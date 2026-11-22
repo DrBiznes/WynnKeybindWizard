@@ -2,7 +2,6 @@ package me.jamino.wynnkeybindwizard.mixin;
 
 import me.jamino.wynnkeybindwizard.KeybindBar;
 import me.jamino.wynnkeybindwizard.KeybindPanel;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Draws the bars (and the All Keybinds popup, when open) right after the container's slots and
+ * Draws the bars right after the container's slots and
  * labels, so they sit under the dragged item and under tooltips. (Fabric's
  * ScreenEvents.afterRender fires after the deferred tooltip has been flushed, which put the bar
  * on top of it.)
@@ -25,9 +24,6 @@ public abstract class AbstractContainerScreenMixin {
     private void wkh$drawKeybindBar(GuiGraphics graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         KeybindBar.render(screen, graphics, mouseX, mouseY);
-        if (KeybindPanel.isOpen()) {
-            KeybindPanel.draw(graphics, Minecraft.getInstance().font, screen.width, screen.height, true);
-        }
     }
 
     /** Item tooltips are drawn above everything, so they would cover the popup. */

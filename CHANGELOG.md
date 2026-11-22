@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0
+
+- The bottom bar now sits on the **bottom edge of the screen**. The new **Bottom bar position**
+  setting (`barPosition`, `SCREEN_BOTTOM` or `UNDER_INVENTORY`) puts it back right under the
+  inventory.
+- Spell keys on the inventory always stay white. They no longer turn red when you hold a key that
+  is also bound to something else, like Favorite on the same key as a spell.
+- The All Keybinds popup is now drawn over everything other mods add to the screen (FancyMenu
+  layouts, Wynntils' inventory widgets, toasts), so they no longer cover it.
+- The spell bar sits a little higher, clear of the trim at the top of Wynncraft's inventory art.
+- Opening the inventory with the cursor on the Ingredient Pouch no longer switches the bar to item
+  actions.
+- Numpad Enter now reads ENTER instead of NENT (Wynntils binds Hold to Compare to it by default).
+
 ## 0.4.0
 
 - Key prompts are now drawn with **Wynncraft's own key art**, read from its resource pack while

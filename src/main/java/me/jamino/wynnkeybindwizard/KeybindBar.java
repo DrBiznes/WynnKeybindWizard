@@ -11,6 +11,7 @@ import me.jamino.wynnkeybindwizard.mixin.AbstractContainerScreenAccessor;
 import me.jamino.wynnkeybindwizard.render.KeyPromptRenderer;
 import me.jamino.wynnkeybindwizard.render.Prompts;
 import me.jamino.wynnkeybindwizard.render.Prompts.Shown;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -37,6 +38,8 @@ public final class KeybindBar {
     private static final int PAD_X = 6;
     private static final int PAD_Y = 4;
     private static final int SCREEN_MARGIN = 2;
+    /** Extra room under the spell bar: Wynncraft's inventory art has trim that reaches above the GUI's top edge. */
+    private static final int SPELL_BAR_GAP = 6;
     private static final float MIN_SCALE = 0.5f;
 
     private static final long FADE_MS = 180;
@@ -71,6 +74,8 @@ public final class KeybindBar {
 
     private static final Bounds BAR = new Bounds();
     private static final Bounds BUTTON = new Bounds();
+    /** Every bar drawn last frame as {x0, y0, x1, y1, scale}, in GUI coordinates (read by the layout test). */
+    private static final List<float[]> DRAWN = new ArrayList<>();
 
     private static List<Shown> lastItemActions = List.of();
     private static long lastItemHover;
@@ -90,6 +95,7 @@ public final class KeybindBar {
         boolean buttonHovered = BUTTON.contains(mouseX, mouseY);
         BAR.clear();
         BUTTON.clear();
+        DRAWN.clear();
         if (!appliesTo(screen)) return;
 
         BarConfig cfg = BarConfig.get();
@@ -100,7 +106,7 @@ public final class KeybindBar {
         // ---- what to show
         Slot slot = gui.wkh$hoveredSlot();
         ItemStack hovered = cfg.dynamic && !KeybindPanel.isOpen() && slot != null && slot.hasItem()
-                ? slot.getItem() : null;
+                && !isIngredientPouch(slot.getItem()) ? slot.getItem() : null;
         WynnInfo.ItemTraits traits = hovered == null ? null : WynnInfo.traits(hovered);
         boolean hasMount = !cfg.dynamic || WynnInfo.hasMount();
 
@@ -110,7 +116,11 @@ public final class KeybindBar {
         Set<InputConstants.Key> itemKeys = new HashSet<>();
         for (BarConfig.Entry entry : cfg.keybinds) {
             if (entry.isSpell()) {
-                if (cfg.spellBar != BarConfig.SpellBar.OFF) addIfBound(spells, entry, font);
+                if (cfg.spellBar == BarConfig.SpellBar.OFF) continue;
+                Shown shown = Prompts.resolve(entry, font);
+                // No spell is ever cast from the inventory, so a spell key held for some other
+                // bind on the same key (Favorite on F, say) must not light up the spell.
+                if (shown != null) spells.add(shown.withHeld(false));
             } else if (entry.isItemAction()) {
                 if (traits == null || !entry.onBar || itemActions.size() >= cfg.itemSlots
                         || !applies(entry.when, traits)) continue;
@@ -162,13 +172,18 @@ public final class KeybindBar {
         // ---- spell bar above the inventory
         if (cfg.spellBar == BarConfig.SpellBar.TOP && !spells.isEmpty()) {
             List<Row> spellRows = flow(spells, wrap);
-            int spaceAbove = gui.wkh$topPos() - cfg.offsetY - SCREEN_MARGIN;
+            int above = gui.wkh$topPos() - cfg.offsetY - SPELL_BAR_GAP;
+            int spaceAbove = above - SCREEN_MARGIN;
             if (spaceAbove >= KeyPromptRenderer.HEIGHT) {
                 float scale = fit(cfg.scale, height(spellRows), spaceAbove);
-                float top = gui.wkh$topPos() - cfg.offsetY - height(spellRows) * scale;
+                float top = above - height(spellRows) * scale;
                 drawBar(g, font, cfg, spellRows, spellRows.size(), 255, null, false, centerX, top, scale, false);
             }
         }
+    }
+
+    public static List<float[]> drawnBars() {
+        return List.copyOf(DRAWN);
     }
 
     /** Returns true when the click landed on the bar, so it must not reach the inventory (and drop an item). */
@@ -193,6 +208,15 @@ public final class KeybindBar {
         };
     }
 
+    /**
+     * Wynncraft opens the inventory with the cursor resting on the ingredient pouch, which would
+     * flip the bar to item actions every time; it has none worth showing, so it doesn't count.
+     */
+    private static boolean isIngredientPouch(ItemStack stack) {
+        String name = ChatFormatting.stripFormatting(stack.getHoverName().getString());
+        return name != null && name.strip().equals("Ingredient Pouch");
+    }
+
     /** Shrinks to fit the free space next to the inventory (high GUI scales leave very little). */
     private static float fit(float scale, int height, int space) {
         return height * scale <= space ? scale : Math.max(MIN_SCALE, space / (float) height);
@@ -211,6 +235,7 @@ public final class KeybindBar {
         int height = height(rows);
         int left = -width / 2;
         if (isBottom) BAR.set(centerX + left * scale, top, centerX + (left + width) * scale, top + height * scale);
+        DRAWN.add(new float[] {centerX + left * scale, top, centerX + (left + width) * scale, top + height * scale, scale});
 
         KeyPromptRenderer.scaled(g, centerX, top, scale, () -> {
             if (cfg.backgroundOpacity > 0) {

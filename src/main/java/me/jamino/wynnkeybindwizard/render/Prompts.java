@@ -24,7 +24,11 @@ public final class Prompts {
     public static final int LABEL_COLOR = 0xE6E6E6;
 
     /** A resolved prompt. {@code prompt} is null for a label with no key (an unbound button). */
-    public record Shown(KeyPrompt prompt, InputConstants.Key key, boolean held, String label, int width) {}
+    public record Shown(KeyPrompt prompt, InputConstants.Key key, boolean held, String label, int width) {
+        public Shown withHeld(boolean held) {
+            return held == this.held ? this : new Shown(prompt, key, held, label, width);
+        }
+    }
 
     private static final Map<InputConstants.Key, KeyPrompt> CACHE = new HashMap<>();
 
