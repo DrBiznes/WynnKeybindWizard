@@ -6,7 +6,8 @@ Not published on its own.
 - **Bottom bar**: a short row of the most important keybinds under the inventory, ending in an
   **All Keybinds** button.
 - **All Keybinds popup**: every configured keybind under headings. Opens from the button or its own
-  rebindable key (default `Y`), over the inventory without closing it, or on its own from the world.
+  rebindable key (default `Y`), over the inventory without closing it. The key only works in
+  inventory screens, not in the world.
 - **Spell keys**: in their own bar above the inventory, as a row of the bottom bar, or only in the
   popup. They are always the current class's keys, named after its spells when Wynntils is installed.
 - **Dynamic mode** (optional): while an item is hovered the bottom bar shows what you can do with
@@ -49,7 +50,7 @@ remap to do. Expected work:
 - `KeyPromptRenderer` is the only class that calls the GUI drawing API; fix it there if that API moved.
 - `AbstractContainerScreenMixin` hooks `renderContents` and `renderTooltip`, and the accessor reads
   `leftPos`, `topPos`, `imageWidth`, `imageHeight`, `hoveredSlot`. Check those names still exist.
-- Input goes through Fabric's screen events and `AllKeybindsScreen`'s `keyPressed`/`mouseClicked`
-  overrides; their signatures changed in 1.21.11 and may again.
+- Input goes through Fabric's screen events (`allowKeyPress`, `allowMouseClick`, `allowMouseScroll`)
+  and `KeyEvent`/`MouseButtonEvent`; their signatures changed in 1.21.11 and may again.
 - `WynntilsCompat` needs a 26.x Wynntils to compile against, and Cloth Config / Mod Menu need 26.x
   builds for the settings screen; the mod runs without any of them.

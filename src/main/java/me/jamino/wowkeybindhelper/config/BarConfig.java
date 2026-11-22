@@ -35,6 +35,8 @@ public final class BarConfig {
 
     public static final String GROUP_SPELLS = "Spells";
 
+    private static final String LOCK_FALLBACK = "key.mouse.middle";
+
     private static BarConfig instance = new BarConfig();
     private static FileTime loadedAt;
 
@@ -72,6 +74,7 @@ public final class BarConfig {
             // Seventh in line: only reaches the bar when something above it is hidden.
             new Entry("Lootpools", "Menus", "key.wynnventory.openRewardScreen").onBar(),
             new Entry("Achievements", "Menus", "key.wynntitles.open"),
+            new Entry("Ingredient Pouch", "Menus", "wynntils.keybind.openIngredientPouch"),
 
             new Entry("Map", "World", "wynntils.keybind.openMainMap"),
             new Entry("Guild Map", "World", "wynntils.keybind.openGuildMap"),
@@ -84,9 +87,10 @@ public final class BarConfig {
             new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").when(WHEN_ITEM_GEAR),
             new Entry("Stat Ranges", "Items", "wynntils.keybind.showIdentificationRange").when(WHEN_ITEM_STATS),
             new Entry("Reroll Chance", "Items", "wynntils.keybind.showIdentificationReroll").when(WHEN_ITEM_STATS),
-            new Entry("Lock Slot", "Items", "wynntils.keybind.lockSlot").when(WHEN_ITEM),
+            // Wynntils' slot lock, else Wynncraft's own middle-click lock. One entry: they are the
+            // same button by default and listing both read as two different actions.
+            new Entry("Lock Slot", "Items", "wynntils.keybind.lockSlot", LOCK_FALLBACK).when(WHEN_ITEM),
             new Entry("Favorite", "Items", "wynntils.keybind.toggleFavorite").when(WHEN_ITEM),
-            new Entry("Share", "Items", "wynntils.keybind.shareItem").when(WHEN_ITEM_STATS),
             new Entry("Screenshot", "Items", "wynntils.keybind.screenshotItem").when(WHEN_ITEM),
             new Entry("Mark to Compare", "Items", "wynntils.keybind.selectForComparing").when(WHEN_ITEM_GEAR)));
 
@@ -181,9 +185,26 @@ public final class BarConfig {
             if (entry.keys == null) entry.keys = new ArrayList<>();
             entry.keys.removeIf(key -> key == null);
         }
+        mergeItemLock();
         if (spellBar == null) spellBar = SpellBar.TOP;
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);
         return this;
+    }
+
+    /**
+     * Files written by 0.2.0 have a separate "Item Lock" entry on middle mouse next to "Lock Slot".
+     * Fold it into Lock Slot as its fallback key. Only the untouched 0.2.0 entry is matched, so a
+     * hand-made entry with another label or key is left alone.
+     */
+    private void mergeItemLock() {
+        boolean removed = keybinds.removeIf(entry -> "Item Lock".equals(entry.label)
+                && entry.keys.equals(List.of(LOCK_FALLBACK)));
+        if (!removed) return;
+        for (Entry entry : keybinds) {
+            if (entry.keys.contains("wynntils.keybind.lockSlot") && !entry.keys.contains(LOCK_FALLBACK)) {
+                entry.keys.add(LOCK_FALLBACK);
+            }
+        }
     }
 }

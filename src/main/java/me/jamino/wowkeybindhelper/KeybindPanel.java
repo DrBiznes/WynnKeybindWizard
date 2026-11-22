@@ -1,9 +1,12 @@
 package me.jamino.wowkeybindhelper;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import me.jamino.wowkeybindhelper.compat.WynnInfo;
 import me.jamino.wowkeybindhelper.config.BarConfig;
 import me.jamino.wowkeybindhelper.render.KeyPromptRenderer;
@@ -15,8 +18,8 @@ import net.minecraft.network.chat.Component;
 
 /**
  * The All Keybinds popup: every configured keybind, grouped under headings, in as many columns
- * as fit. Drawn either as a modal over a container screen (so opening it never closes the
- * inventory or a bank) or inside {@link AllKeybindsScreen} when opened from the world.
+ * as fit. Drawn as a modal over a container screen, so opening it never closes the inventory
+ * or a bank. It is only available from those screens, not from the world.
  */
 public final class KeybindPanel {
     private static final int PAD = 9;
@@ -36,9 +39,27 @@ public final class KeybindPanel {
     private static final int HEADER_COLOR = 0xA8B4BC;
     private static final int SCROLLBAR = 0x80FFFFFF;
 
-    private record Group(String title, List<Shown> items) {
+    // The little "show spells on the inventory" switch above the Spells heading.
+    private static final int TOGGLE_HEIGHT = 10;
+    private static final int SWITCH_W = 13;
+    private static final int SWITCH_H = 7;
+    private static final int SWITCH_GAP = 4;
+    private static final float TOGGLE_TEXT_SCALE = 0.75f;
+    private static final int SWITCH_ON = 0xFF3F8F4A;
+    private static final int SWITCH_OFF = 0xFF4A4448;
+    private static final int SWITCH_KNOB = 0xFFE8E2D6;
+    private static final int TOGGLE_TEXT = 0x8C979E;
+
+    private record Group(String title, List<Shown> items, boolean spellToggle) {
         int height() {
-            return HEADER_HEIGHT + items.size() * ROW_HEIGHT;
+            return (spellToggle ? TOGGLE_HEIGHT : 0) + HEADER_HEIGHT + items.size() * ROW_HEIGHT;
+        }
+
+        int width(Font font) {
+            int w = font.width(title);
+            if (spellToggle) w = Math.max(w, toggleWidth(font));
+            for (Shown item : items) w = Math.max(w, item.width());
+            return w;
         }
     }
 
@@ -46,6 +67,10 @@ public final class KeybindPanel {
     private static int scroll;
     private static int maxScroll;
     private static int x0, y0, x1, y1;
+    /** Clickable area of the spell switch in screen coordinates; empty when it is scrolled out of view. */
+    private static int tx0, ty0, tx1, ty1;
+    /** Where the spells were before the switch turned them off, so turning it back on restores that. */
+    private static BarConfig.SpellBar lastShown = BarConfig.SpellBar.TOP;
 
     private KeybindPanel() {}
 
@@ -66,6 +91,36 @@ public final class KeybindPanel {
         return x >= x0 && x < x1 && y >= y0 && y < y1;
     }
 
+    /** Handles a click inside the panel. */
+    public static void click(double x, double y) {
+        if (x >= tx0 && x < tx1 && y >= ty0 && y < ty1) toggleSpellBar();
+    }
+
+    /** Center of the spell switch in GUI coordinates as last drawn, or null if it isn't visible. For tests. */
+    public static double[] spellToggleCenter() {
+        if (tx1 <= tx0) return null;
+        return new double[] {tx0 + 1 + SWITCH_W / 2.0, (ty0 + ty1) / 2.0};
+    }
+
+    private static void toggleSpellBar() {
+        BarConfig cfg = BarConfig.get();
+        if (cfg.spellBar == BarConfig.SpellBar.OFF) {
+            cfg.spellBar = lastShown;
+        } else {
+            lastShown = cfg.spellBar;
+            cfg.spellBar = BarConfig.SpellBar.OFF;
+        }
+        BarConfig.save();
+    }
+
+    private static String toggleLabel() {
+        return Component.translatable("wowkeybindhelper.panel.show_spells").getString();
+    }
+
+    private static int toggleWidth(Font font) {
+        return SWITCH_W + SWITCH_GAP + Math.round(font.width(toggleLabel()) * TOGGLE_TEXT_SCALE);
+    }
+
     public static void scrollBy(double wheel) {
         scroll = Math.clamp(scroll - (int) Math.signum(wheel) * SCROLL_STEP, 0, maxScroll);
     }
@@ -77,8 +132,7 @@ public final class KeybindPanel {
         int columnWidth = 0;
         int total = 0;
         for (Group group : groups) {
-            columnWidth = Math.max(columnWidth, font.width(group.title));
-            for (Shown item : group.items) columnWidth = Math.max(columnWidth, item.width());
+            columnWidth = Math.max(columnWidth, group.width(font));
             total += group.height() + GROUP_GAP;
         }
 
@@ -107,10 +161,7 @@ public final class KeybindPanel {
         int[] widths = new int[columns.size()];
         int width = Math.max(0, columns.size() - 1) * COLUMN_GAP + PAD * 2;
         for (int i = 0; i < widths.length; i++) {
-            for (Group group : columns.get(i)) {
-                widths[i] = Math.max(widths[i], font.width(group.title));
-                for (Shown item : group.items) widths[i] = Math.max(widths[i], item.width());
-            }
+            for (Group group : columns.get(i)) widths[i] = Math.max(widths[i], group.width(font));
             width += widths[i];
         }
         width = Math.max(width, font.width(title()) + PAD * 2);
@@ -135,12 +186,25 @@ public final class KeybindPanel {
         KeyPromptRenderer.text(g, font, title, (screenWidth - font.width(title)) / 2, y0 + PAD - 1, TITLE_COLOR, 255);
 
         int top = y0 + PAD + TITLE_HEIGHT;
+        tx0 = ty0 = tx1 = ty1 = 0;
         KeyPromptRenderer.scissor(g, x0 + 2, top, x1 - 2, top + viewHeight);
         int x = x0 + PAD;
         for (int i = 0; i < columns.size(); i++) {
             List<Group> column = columns.get(i);
             int y = top - scroll;
             for (Group group : column) {
+                if (group.spellToggle) {
+                    drawToggle(g, font, x, y);
+                    // Only clickable where it is actually visible inside the scroll view.
+                    int visTop = Math.max(y, top), visBottom = Math.min(y + SWITCH_H + 1, top + viewHeight);
+                    if (visTop < visBottom) {
+                        tx0 = x - 1;
+                        ty0 = visTop - 1;
+                        tx1 = x + toggleWidth(font) + 1;
+                        ty1 = visBottom + 1;
+                    }
+                    y += TOGGLE_HEIGHT;
+                }
                 KeyPromptRenderer.text(g, font, group.title, x, y, HEADER_COLOR, 255);
                 y += HEADER_HEIGHT;
                 for (Shown item : group.items) {
@@ -160,6 +224,19 @@ public final class KeybindPanel {
         }
     }
 
+    private static void drawToggle(GuiGraphics g, Font font, int x, int y) {
+        boolean on = BarConfig.get().spellBar != BarConfig.SpellBar.OFF;
+        // A rounded-off pill: the track minus its corners, with a square knob at one end.
+        KeyPromptRenderer.rect(g, x + 1, y, x + SWITCH_W - 1, y + SWITCH_H, on ? SWITCH_ON : SWITCH_OFF);
+        KeyPromptRenderer.rect(g, x, y + 1, x + SWITCH_W, y + SWITCH_H - 1, on ? SWITCH_ON : SWITCH_OFF);
+        int knobX = on ? x + SWITCH_W - SWITCH_H + 1 : x + 1;
+        KeyPromptRenderer.rect(g, knobX, y + 1, knobX + SWITCH_H - 2, y + SWITCH_H - 1, SWITCH_KNOB);
+
+        float textY = y + (SWITCH_H - font.lineHeight * TOGGLE_TEXT_SCALE) / 2f + 0.5f;
+        KeyPromptRenderer.scaled(g, x + SWITCH_W + SWITCH_GAP, textY, TOGGLE_TEXT_SCALE,
+                () -> KeyPromptRenderer.text(g, font, toggleLabel(), 0, 0, on ? HEADER_COLOR : TOGGLE_TEXT, 255));
+    }
+
     private static String title() {
         return Component.translatable("wowkeybindhelper.panel.title").getString();
     }
@@ -167,21 +244,27 @@ public final class KeybindPanel {
     /** Every bound keybind under its heading, headings in order of first appearance in the config. */
     private static List<Group> groups(Font font) {
         Map<String, List<Shown>> byGroup = new LinkedHashMap<>();
+        Set<InputConstants.Key> itemKeys = new HashSet<>();
         for (BarConfig.Entry entry : BarConfig.get().keybinds) {
             Shown shown = Prompts.resolve(entry, font);
             if (shown == null) continue;
+            // Same rule as the bar: item actions sharing a key are one press (Wynntils stacks
+            // several views on Shift), so only the first is listed. Other shared keys stay, since
+            // two menus on one key is a real clash the player should see.
+            if (entry.isItemAction() && !itemKeys.add(shown.key())) continue;
             byGroup.computeIfAbsent(entry.group.isEmpty() ? "Other" : entry.group, k -> new ArrayList<>()).add(shown);
         }
 
         List<Group> groups = new ArrayList<>();
         byGroup.forEach((name, items) -> {
             String heading = name;
-            if (BarConfig.GROUP_SPELLS.equals(name)) {
+            boolean spells = BarConfig.GROUP_SPELLS.equals(name);
+            if (spells) {
                 // The spell keys are whatever the current class's profile has bound right now.
                 String className = WynnInfo.className();
                 if (className != null) heading = className + " " + name;
             }
-            groups.add(new Group(heading, items));
+            groups.add(new Group(heading, items, spells));
         });
         return groups;
     }

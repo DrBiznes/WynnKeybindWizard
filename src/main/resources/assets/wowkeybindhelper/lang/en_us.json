@@ -3,5 +3,6 @@
   "key.wowkeybindhelper.all_keybinds": "Show All Keybinds",
   "wowkeybindhelper.all_keybinds": "All Keybinds",
   "wowkeybindhelper.panel.title": "Keybinds",
+  "wowkeybindhelper.panel.show_spells": "Show on inventory",
   "wowkeybindhelper.config.title": "WoW Keybind Helper"
 }

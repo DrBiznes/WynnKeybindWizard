@@ -4,8 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import me.jamino.wowkeybindhelper.AllKeybindsScreen;
 import me.jamino.wowkeybindhelper.KeybindPanel;
+import me.jamino.wowkeybindhelper.config.BarConfig;
 import me.jamino.wowkeybindhelper.config.ClothConfigScreen;
 import me.jamino.wowkeybindhelper.mixin.AbstractContainerScreenAccessor;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -55,7 +55,6 @@ public class InventoryBarTest implements FabricClientGameTest {
                 {"label": "Lock Slot", "group": "Items", "keys": ["key.mouse.middle"], "when": "item"},
                 {"label": "Favorite", "group": "Items", "keys": ["key.keyboard.f"], "when": "item"},
                 {"label": "Same Key As Favorite", "group": "Items", "keys": ["key.keyboard.f"], "when": "item"},
-                {"label": "Share", "group": "Items", "keys": ["key.keyboard.f3"], "when": "item_stats"},
                 {"label": "Screenshot", "group": "Items", "keys": ["key.keyboard.f4"], "when": "item"}
               ]
             """;
@@ -105,6 +104,18 @@ public class InventoryBarTest implements FabricClientGameTest {
             if (!KeybindPanel.isOpen()) throw new AssertionError("hotkey did not open the popup");
             context.takeScreenshot("4-popup-over-inventory");
 
+            // The switch above the spells turns the inventory spell bar off and back on.
+            clickSpellToggle(context);
+            if (context.computeOnClient(mc -> BarConfig.get().spellBar) != BarConfig.SpellBar.OFF) {
+                throw new AssertionError("spell switch did not turn the spell bar off");
+            }
+            if (!KeybindPanel.isOpen()) throw new AssertionError("clicking the switch closed the popup");
+            context.takeScreenshot("4b-popup-spells-switched-off");
+            clickSpellToggle(context);
+            if (context.computeOnClient(mc -> BarConfig.get().spellBar) != BarConfig.SpellBar.TOP) {
+                throw new AssertionError("spell switch did not restore the spell bar to the top");
+            }
+
             // Escape closes the popup, not the inventory.
             context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
             context.waitTicks(5);
@@ -122,14 +133,16 @@ public class InventoryBarTest implements FabricClientGameTest {
             context.waitTicks(10);
             context.takeScreenshot("5-spells-on-bottom-dynamic-off");
 
-            // From the world, the hotkey opens the popup as its own screen.
+            // From the world, the hotkey does nothing: the popup is inventory-only.
             context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
             context.waitTicks(5);
             context.getInput().pressKey(GLFW.GLFW_KEY_Y);
             context.waitTicks(10);
-            boolean opened = context.computeOnClient(mc -> mc.screen instanceof AllKeybindsScreen);
-            if (!opened) throw new AssertionError("hotkey did not open the popup screen in the world");
-            context.takeScreenshot("6-popup-from-world");
+            boolean anyScreen = context.computeOnClient(mc -> mc.screen != null);
+            if (anyScreen || KeybindPanel.isOpen()) {
+                throw new AssertionError("hotkey should not open anything outside the inventory");
+            }
+            context.takeScreenshot("6-hotkey-in-world-does-nothing");
 
             // The Cloth Config screen builds and opens.
             context.setScreen(() -> ClothConfigScreen.create(null));
@@ -142,6 +155,18 @@ public class InventoryBarTest implements FabricClientGameTest {
                 // Only the throwaway test run directory is affected.
             }
         }
+    }
+
+    private static void clickSpellToggle(ClientGameTestContext context) {
+        double[] pos = context.computeOnClient(mc -> {
+            double[] center = KeybindPanel.spellToggleCenter();
+            if (center == null) throw new AssertionError("spell switch is not visible in the popup");
+            double scale = mc.getWindow().getGuiScale();
+            return new double[] {center[0] * scale, center[1] * scale};
+        });
+        context.getInput().setCursorPos(pos[0], pos[1]);
+        context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+        context.waitTicks(5);
     }
 
     private static void openInventory(ClientGameTestContext context) {
