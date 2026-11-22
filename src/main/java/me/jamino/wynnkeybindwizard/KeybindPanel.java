@@ -1,4 +1,4 @@
-package me.jamino.wynnkeybindhelper;
+package me.jamino.wynnkeybindwizard;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import me.jamino.wynnkeybindhelper.compat.WynnInfo;
-import me.jamino.wynnkeybindhelper.config.BarConfig;
-import me.jamino.wynnkeybindhelper.render.KeyPromptRenderer;
-import me.jamino.wynnkeybindhelper.render.Prompts;
-import me.jamino.wynnkeybindhelper.render.Prompts.Shown;
+import me.jamino.wynnkeybindwizard.compat.WynnInfo;
+import me.jamino.wynnkeybindwizard.config.BarConfig;
+import me.jamino.wynnkeybindwizard.render.KeyPromptRenderer;
+import me.jamino.wynnkeybindwizard.render.Prompts;
+import me.jamino.wynnkeybindwizard.render.Prompts.Shown;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -126,7 +126,7 @@ public final class KeybindPanel {
     }
 
     private static String toggleLabel() {
-        return Component.translatable("wynnkeybindhelper.panel.show_spells").getString();
+        return Component.translatable("wynnkeybindwizard.panel.show_spells").getString();
     }
 
     private static int toggleWidth(Font font) {
@@ -254,7 +254,7 @@ public final class KeybindPanel {
     }
 
     private static String title() {
-        return Component.translatable("wynnkeybindhelper.panel.title").getString();
+        return Component.translatable("wynnkeybindwizard.panel.title").getString();
     }
 
     /** Every bound keybind under its heading, headings in order of first appearance in the config. */

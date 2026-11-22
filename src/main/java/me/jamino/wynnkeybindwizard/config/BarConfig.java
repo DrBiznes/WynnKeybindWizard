@@ -1,4 +1,4 @@
-package me.jamino.wynnkeybindhelper.config;
+package me.jamino.wynnkeybindwizard.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,11 +9,11 @@ import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
+import me.jamino.wynnkeybindwizard.WynnKeybindWizard;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * config/wynnkeybindhelper.json. The modpack ships this file; the defaults below are the
+ * config/wynnkeybindwizard.json. The modpack ships this file; the defaults below are the
  * World of Wynncraft layout and are written out on first launch. The optional Cloth Config
  * screen edits this same object and saves it back through {@link #save()}.
  *
@@ -23,7 +23,7 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class BarConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindhelper.json");
+    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindwizard.json");
 
     /** Where the spell keys are shown on the inventory. They are always in the popup. */
     public enum SpellBar { TOP, BOTTOM, OFF }
@@ -200,7 +200,7 @@ public final class BarConfig {
             if (loaded != null) instance = loaded.sanitized();
         } catch (IOException | RuntimeException e) {
             // Bad JSON or an unreadable file: keep whatever was working before.
-            WynnKeybindHelper.LOGGER.error("Could not load {}, keeping previous settings", PATH, e);
+            WynnKeybindWizard.LOGGER.error("Could not load {}, keeping previous settings", PATH, e);
         }
     }
 
@@ -210,7 +210,7 @@ public final class BarConfig {
             Files.writeString(PATH, GSON.toJson(instance.sanitized()));
             loadedAt = Files.getLastModifiedTime(PATH);
         } catch (IOException e) {
-            WynnKeybindHelper.LOGGER.error("Could not save {}", PATH, e);
+            WynnKeybindWizard.LOGGER.error("Could not save {}", PATH, e);
         }
     }
 

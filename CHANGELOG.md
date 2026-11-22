@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- Renamed to **Wynn Keybind Helper**. The mod id is now `wynnkeybindhelper`, so the config file is
-  `config/wynnkeybindhelper.json` and the jar is `wynnkeybindhelper-<version>.jar`.
+- Renamed to **Wynn Keybind Wizard**. The mod id is now `wynnkeybindwizard`, so the config file is
+  `config/wynnkeybindwizard.json` and the jar is `wynnkeybindwizard-<version>.jar`.
 - Now MIT licensed, with an icon and project links, ready to be used in any Wynncraft modpack.
 - Wynntils' six custom command keybinds are built in. Name them on the new **Custom Commands**
   settings page (or `customCommands` in the file) and they show up with that label; unnamed slots
@@ -55,4 +55,4 @@
 - Everything else on pages that cycle on their own. Hovering pauses them, and clicking or scrolling
   flips pages.
 - Item actions replace the page while an item is hovered.
-- Layout is set in `config/wynnkeybindhelper.json`.
+- Layout is set in `config/wynnkeybindwizard.json`.

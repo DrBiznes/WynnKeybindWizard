@@ -1,13 +1,13 @@
-package me.jamino.wynnkeybindhelper.test;
+package me.jamino.wynnkeybindwizard.test;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import me.jamino.wynnkeybindhelper.KeybindPanel;
-import me.jamino.wynnkeybindhelper.config.BarConfig;
-import me.jamino.wynnkeybindhelper.config.ClothConfigScreen;
-import me.jamino.wynnkeybindhelper.mixin.AbstractContainerScreenAccessor;
+import me.jamino.wynnkeybindwizard.KeybindPanel;
+import me.jamino.wynnkeybindwizard.config.BarConfig;
+import me.jamino.wynnkeybindwizard.config.ClothConfigScreen;
+import me.jamino.wynnkeybindwizard.mixin.AbstractContainerScreenAccessor;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -60,7 +60,7 @@ public class InventoryBarTest implements FabricClientGameTest {
               ]
             """;
 
-    private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindhelper.json");
+    private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindwizard.json");
 
     @Override
     public void runTest(ClientGameTestContext context) {

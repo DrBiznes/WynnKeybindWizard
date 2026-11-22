@@ -1,4 +1,4 @@
-# Wynn Keybind Helper
+# Wynn Keybind Wizard
 
 Live key prompts around the inventory for Wynncraft (Fabric 1.21.11). Built for modpack makers: you
 choose which keybinds show up, from Wynntils and from any other mod in your pack, and ship the layout
@@ -27,10 +27,10 @@ Mod Menu (the in-game settings screen).
 
 ## For modpack makers
 
-1. Install the mod and launch once. `config/wynnkeybindhelper.json` is written with the default layout.
-2. Set the layout in game (Mod Menu > Wynn Keybind Helper, needs Cloth Config) or in the file. The file
+1. Install the mod and launch once. `config/wynnkeybindwizard.json` is written with the default layout.
+2. Set the layout in game (Mod Menu > Wynn Keybind Wizard, needs Cloth Config) or in the file. The file
    is re-read every time a container screen opens, so edits apply without a restart.
-3. Ship `config/wynnkeybindhelper.json` in your pack.
+3. Ship `config/wynnkeybindwizard.json` in your pack.
 
 Players can change the same settings in game. A pack update that ships the file again replaces
 their changes, as with any config a pack ships.
@@ -92,7 +92,7 @@ Players without that mod never see the entry.
 
 ## Building and testing
 
-    gradlew build                 # build/libs/wynnkeybindhelper-<version>.jar
+    gradlew build                 # build/libs/wynnkeybindwizard-<version>.jar
     gradlew runClientGameTest     # drives a real client, screenshots to build/run/clientGameTest/screenshots
 
 ## Porting to 26.x

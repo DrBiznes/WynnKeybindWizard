@@ -1,6 +1,6 @@
-package me.jamino.wynnkeybindhelper.render;
+package me.jamino.wynnkeybindwizard.render;
 
-import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
+import me.jamino.wynnkeybindwizard.WynnKeybindWizard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -47,7 +47,7 @@ public final class KeyPromptRenderer {
     private KeyPromptRenderer() {}
 
     private static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(WynnKeybindHelper.MOD_ID, path);
+        return Identifier.fromNamespaceAndPath(WynnKeybindWizard.MOD_ID, path);
     }
 
     public static int width(KeyPrompt prompt) {

@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "id": "wynnkeybindhelper",
+  "id": "wynnkeybindwizard",
   "version": "${version}",
-  "name": "Wynn Keybind Helper",
+  "name": "Wynn Keybind Wizard",
   "description": "Shows your Wynncraft keybinds as live key prompts around the inventory, plus an All Keybinds popup. Built for modpack makers: pick which mods' keybinds to show, name your Wynntils custom commands, and ship the layout in one config file.",
   "authors": ["DrBiznes"],
   "contact": {
-    "homepage": "https://github.com/DrBiznes/WynnKeybindHelper",
-    "sources": "https://github.com/DrBiznes/WynnKeybindHelper",
-    "issues": "https://github.com/DrBiznes/WynnKeybindHelper/issues"
+    "homepage": "https://github.com/DrBiznes/WynnKeybindWizard",
+    "sources": "https://github.com/DrBiznes/WynnKeybindWizard",
+    "issues": "https://github.com/DrBiznes/WynnKeybindWizard/issues"
   },
   "license": "MIT",
-  "icon": "assets/wynnkeybindhelper/icon.png",
+  "icon": "assets/wynnkeybindwizard/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["me.jamino.wynnkeybindhelper.WynnKeybindHelper"],
-    "modmenu": ["me.jamino.wynnkeybindhelper.config.ModMenuIntegration"]
+    "client": ["me.jamino.wynnkeybindwizard.WynnKeybindWizard"],
+    "modmenu": ["me.jamino.wynnkeybindwizard.config.ModMenuIntegration"]
   },
-  "mixins": ["wynnkeybindhelper.mixins.json"],
+  "mixins": ["wynnkeybindwizard.mixins.json"],
   "depends": {
     "java": ">=21",
     "minecraft": ">=${minecraft_version}",

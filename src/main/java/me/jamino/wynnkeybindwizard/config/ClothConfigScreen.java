@@ -1,4 +1,4 @@
-package me.jamino.wynnkeybindhelper.config;
+package me.jamino.wynnkeybindwizard.config;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,8 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import me.jamino.wynnkeybindhelper.WynnKeybindHelper;
-import me.jamino.wynnkeybindhelper.compat.WynnInfo;
+import me.jamino.wynnkeybindwizard.WynnKeybindWizard;
+import me.jamino.wynnkeybindwizard.compat.WynnInfo;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -47,7 +47,7 @@ public final class ClothConfigScreen {
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.translatable("wynnkeybindhelper.config.title"))
+                .setTitle(Component.translatable("wynnkeybindwizard.config.title"))
                 .setSavingRunnable(() -> {
                     cfg.keybinds.removeAll(removing);
                     BarConfig.Entry added = adding.toEntry();
@@ -121,7 +121,7 @@ public final class ClothConfigScreen {
         ConfigCategory bar = builder.getOrCreateCategory(Component.literal("Bottom Bar"));
         bar.addEntry(entries.startTextDescription(Component.literal(
                 "Pick what goes on the bar. It shows the first ones that fit, in this order;"
-                        + " reorder them in config/wynnkeybindhelper.json. Add keybinds on the Add Keybind page.")).build());
+                        + " reorder them in config/wynnkeybindwizard.json. Add keybinds on the Add Keybind page.")).build());
         ConfigCategory items = builder.getOrCreateCategory(Component.literal("Item Actions"));
         items.addEntry(entries.startTextDescription(Component.literal(
                 "Pick what the bar shows while you hover an item (dynamic mode). Unpicked actions"
@@ -238,7 +238,7 @@ public final class ClothConfigScreen {
     /** "Name  (Mod)" for every registered keybind except our own, sorted by mod then name; mapped to its id. */
     private static Map<String, String> keybindChoices() {
         List<KeyMapping> mappings = new ArrayList<>(List.of(Minecraft.getInstance().options.keyMappings));
-        mappings.remove(WynnKeybindHelper.openKey());
+        mappings.remove(WynnKeybindWizard.openKey());
         mappings.sort(Comparator.comparing((KeyMapping m) -> m.getCategory().label().getString())
                 .thenComparing(m -> Component.translatable(m.getName()).getString()));
         Map<String, String> byName = new LinkedHashMap<>();

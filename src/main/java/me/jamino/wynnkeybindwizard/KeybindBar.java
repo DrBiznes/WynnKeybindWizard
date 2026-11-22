@@ -1,16 +1,16 @@
-package me.jamino.wynnkeybindhelper;
+package me.jamino.wynnkeybindwizard;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import me.jamino.wynnkeybindhelper.compat.WynnInfo;
-import me.jamino.wynnkeybindhelper.config.BarConfig;
-import me.jamino.wynnkeybindhelper.mixin.AbstractContainerScreenAccessor;
-import me.jamino.wynnkeybindhelper.render.KeyPromptRenderer;
-import me.jamino.wynnkeybindhelper.render.Prompts;
-import me.jamino.wynnkeybindhelper.render.Prompts.Shown;
+import me.jamino.wynnkeybindwizard.compat.WynnInfo;
+import me.jamino.wynnkeybindwizard.config.BarConfig;
+import me.jamino.wynnkeybindwizard.mixin.AbstractContainerScreenAccessor;
+import me.jamino.wynnkeybindwizard.render.KeyPromptRenderer;
+import me.jamino.wynnkeybindwizard.render.Prompts;
+import me.jamino.wynnkeybindwizard.render.Prompts.Shown;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -135,8 +135,8 @@ public final class KeybindBar {
         }
         int fade = (int) Math.clamp(255 * (now - shownSince) / FADE_MS, 16, 255);
 
-        Shown button = Prompts.of(Prompts.boundKey(WynnKeybindHelper.openKey()),
-                Component.translatable("wynnkeybindhelper.all_keybinds").getString(), font);
+        Shown button = Prompts.of(Prompts.boundKey(WynnKeybindWizard.openKey()),
+                Component.translatable("wynnkeybindwizard.all_keybinds").getString(), font);
         List<Shown> bottom = new ArrayList<>(itemMode ? lastItemActions : main);
         bottom.add(button);
 

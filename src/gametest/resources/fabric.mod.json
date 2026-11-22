@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "wynnkeybindhelper-test",
+  "id": "wynnkeybindwizard-test",
   "version": "1.0.0",
-  "name": "Wynn Keybind Helper Tests",
+  "name": "Wynn Keybind Wizard Tests",
   "environment": "client",
   "entrypoints": {
     "fabric-client-gametest": [
-      "me.jamino.wynnkeybindhelper.test.InventoryBarTest"
+      "me.jamino.wynnkeybindwizard.test.InventoryBarTest"
     ]
   },
   "depends": {
-    "wynnkeybindhelper": "*"
+    "wynnkeybindwizard": "*"
   }
 }

@@ -1,4 +1,4 @@
-package me.jamino.wynnkeybindhelper.mixin;
+package me.jamino.wynnkeybindwizard.mixin;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
