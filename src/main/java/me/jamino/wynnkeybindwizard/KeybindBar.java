@@ -153,7 +153,10 @@ public final class KeybindBar {
         int spaceBelow = screen.height - below - SCREEN_MARGIN;
         if (spaceBelow >= KeyPromptRenderer.HEIGHT) {
             float scale = fit(cfg.scale, height(rows), spaceBelow);
-            drawBar(g, font, cfg, rows, fadedFrom, fade, button, buttonHovered, centerX, below, scale, true);
+            // At the screen edge the bar keeps the same scale, so it still never covers the inventory.
+            float top = cfg.barPosition == BarConfig.BarPosition.SCREEN_BOTTOM
+                    ? screen.height - SCREEN_MARGIN - height(rows) * scale : below;
+            drawBar(g, font, cfg, rows, fadedFrom, fade, button, buttonHovered, centerX, top, scale, true);
         }
 
         // ---- spell bar above the inventory

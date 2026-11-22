@@ -73,6 +73,16 @@ public final class ClothConfigScreen {
                         Component.literal("or only in the All Keybinds popup."))
                 .setSaveConsumer(value -> cfg.spellBar = value)
                 .build());
+        general.addEntry(entries.startEnumSelector(Component.literal("Bottom bar position"), BarConfig.BarPosition.class, cfg.barPosition)
+                .setDefaultValue(defaults.barPosition)
+                .setEnumNameProvider(value -> Component.literal(switch ((BarConfig.BarPosition) value) {
+                    case SCREEN_BOTTOM -> "Bottom of screen";
+                    case UNDER_INVENTORY -> "Under inventory";
+                }))
+                .setTooltip(Component.literal("Put the bottom bar on the bottom edge of the screen,"),
+                        Component.literal("or right under the inventory."))
+                .setSaveConsumer(value -> cfg.barPosition = value)
+                .build());
         general.addEntry(entries.startBooleanToggle(Component.literal("Dynamic mode"), cfg.dynamic)
                 .setDefaultValue(defaults.dynamic)
                 .setTooltip(Component.literal("Show item actions while hovering an item, and replace"),

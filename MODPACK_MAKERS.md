@@ -85,6 +85,7 @@ The entry is hidden while that WynnExtras feature is switched off.
 | `barSlots` | How many keybinds the bottom bar holds (the All Keybinds button is extra). |
 | `itemSlots` | How many item actions the bar holds while an item is hovered. |
 | `spellBar` | `TOP`, `BOTTOM` or `OFF` (popup only). |
+| `barPosition` | `SCREEN_BOTTOM` (default, on the bottom edge of the screen) or `UNDER_INVENTORY`. |
 | `dynamic` | Item actions while hovering, and hiding keybinds you cannot use yet. |
 | `offsetY`, `scale`, `backgroundOpacity` | Gap from the inventory, size, and darkness (0-100) of the box behind the bars. |
 | `showHeldKeys` | Draw a key red while it is held down. |

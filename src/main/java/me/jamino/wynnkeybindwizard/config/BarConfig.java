@@ -28,6 +28,9 @@ public final class BarConfig {
     /** Where the spell keys are shown on the inventory. They are always in the popup. */
     public enum SpellBar { TOP, BOTTOM, OFF }
 
+    /** Where the bottom bar sits: on the bottom edge of the screen, or right under the inventory. */
+    public enum BarPosition { SCREEN_BOTTOM, UNDER_INVENTORY }
+
     /** Values for {@link Entry#when}. */
     public static final String WHEN_HAS_MOUNT = "has_mount";
     public static final String WHEN_ITEM = "item";
@@ -66,6 +69,7 @@ public final class BarConfig {
     /** How many item actions the bottom bar holds while an item is hovered (dynamic mode). */
     public int itemSlots = 5;
     public SpellBar spellBar = SpellBar.TOP;
+    public BarPosition barPosition = BarPosition.SCREEN_BOTTOM;
     /**
      * Context awareness: the bar swaps to item actions while an item is hovered, and entries
      * whose {@code when} is not met (no mount yet) give their slot to the next one in line.
@@ -252,6 +256,7 @@ public final class BarConfig {
         while (customCommands.size() < CUSTOM_COMMAND_KEYS.size()) customCommands.add("");
         while (customCommands.size() > CUSTOM_COMMAND_KEYS.size()) customCommands.removeLast();
         if (spellBar == null) spellBar = SpellBar.TOP;
+        if (barPosition == null) barPosition = BarPosition.SCREEN_BOTTOM;
         if (!(scale > 0)) scale = 1.0f;
         barSlots = Math.clamp(barSlots, 1, 12);
         itemSlots = Math.clamp(itemSlots, 1, 12);
