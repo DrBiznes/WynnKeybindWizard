@@ -158,6 +158,10 @@ public final class BarConfig {
      * ({@code item}, {@code item_stats}, {@code item_gear}); item entries with {@code onBar} are
      * what the bar shows while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names,
      * and {@code $command1}..{@code $command6} become the matching {@link #customCommands} text.
+     *
+     * <p>{@code worksInInventory} off keeps this entry's key from closing the inventory and acting
+     * in the world while it is on the bottom bar (see {@link BarConfig#keysWorkInInventory}).
+     * Spells and item actions never act from the inventory, so it does nothing for them.
      */
     public static final class Entry {
         public String label = "";
@@ -165,6 +169,7 @@ public final class BarConfig {
         public List<String> keys = new ArrayList<>();
         public boolean onBar = false;
         public String when = "";
+        public boolean worksInInventory = true;
 
         public Entry() {}
 

@@ -19,7 +19,7 @@ their changes, as with any config a pack ships.
   **All Keybinds** button. Pressing one of those keys in the inventory closes it and does what the
   key does in the world, so Quest Book opens the quest book. Keys the inventory uses itself (hotbar
   slots, drop, offhand) and keys the hovered item is using stay with the inventory. Turn this off
-  with `keysWorkInInventory`.
+  with `keysWorkInInventory`, or for one keybind with its `worksInInventory`.
 - **All Keybinds popup**: every configured keybind under headings. Opens from the button or its own
   rebindable key (default `Y`), over the inventory without closing it. The key only works in
   inventory screens, not in the world.
@@ -57,8 +57,8 @@ move or regroup them like any other entry.
 
 **In game:** open the **Add Keybind** page, pick the keybind from the list (every keybind in
 Controls, with the mod it belongs to; type to search), give it a label and a heading, choose whether
-it is an item action or a bar candidate, and Save. Keybinds added this way are listed on the same
-page with a Remove switch.
+it is an item action or a bar candidate, whether its key works from the inventory, and Save. Keybinds added this way are listed on the same
+page with a Remove switch and their **Works in inventory** switch.
 
 **In the file:** find the keybind's id in `options.txt`. It is the part after `key_`, so
 `key_wynnventory.openRewardScreen:key.keyboard.n` is `wynnventory.openRewardScreen`. Add an entry:
@@ -105,3 +105,4 @@ The entry is hidden while that WynnExtras feature is switched off.
 | `group` | Heading in the popup. `Spells` is special: those entries are the spell bar. |
 | `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots`; unpicked ones stay in the popup. |
 | `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`) which makes it an item action. |
+| `worksInInventory` | Default `true`. `false` keeps this keybind's key from closing the inventory and acting in the world while it is on the bottom bar; it is still shown. Has no effect on spells and item actions, or when `keysWorkInInventory` is off. |

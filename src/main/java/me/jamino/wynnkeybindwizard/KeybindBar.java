@@ -117,6 +117,7 @@ public final class KeybindBar {
         List<Shown> spells = new ArrayList<>();
         List<Shown> main = new ArrayList<>();
         List<Shown> itemActions = new ArrayList<>();
+        Set<InputConstants.Key> pressable = new HashSet<>();
         Set<InputConstants.Key> itemKeys = new HashSet<>();
         for (BarConfig.Entry entry : cfg.keybinds) {
             if (entry.isSpell()) {
@@ -134,7 +135,11 @@ public final class KeybindBar {
                 if (shown != null && itemKeys.add(shown.key())) itemActions.add(shown);
             } else if (entry.onBar && main.size() < cfg.barSlots) {
                 if (BarConfig.WHEN_HAS_MOUNT.equals(entry.when) && !hasMount) continue;
-                addIfBound(main, entry, font);
+                Shown shown = Prompts.resolve(entry, font);
+                if (shown != null) {
+                    main.add(shown);
+                    if (entry.worksInInventory) pressable.add(shown.key());
+                }
             }
         }
 
@@ -151,7 +156,8 @@ public final class KeybindBar {
 
         // The keybinds stay pressable while the item actions are showing, except on a key the
         // hovered item is using: there the item action wins, as the bar says.
-        for (Shown shown : main) BAR_KEYS.add(shown.key());
+        // Entries the pack marked worksInInventory: false are shown but stay inert here.
+        BAR_KEYS.addAll(pressable);
         if (itemMode) for (Shown shown : lastItemActions) BAR_KEYS.remove(shown.key());
 
         Shown button = Prompts.of(Prompts.boundKey(WynnKeybindWizard.openKey()),
@@ -239,11 +245,6 @@ public final class KeybindBar {
             return true;
         }
         return BAR.contains(x, y);
-    }
-
-    private static void addIfBound(List<Shown> list, BarConfig.Entry entry, Font font) {
-        Shown shown = Prompts.resolve(entry, font);
-        if (shown != null) list.add(shown);
     }
 
     private static boolean applies(String when, WynnInfo.ItemTraits traits) {

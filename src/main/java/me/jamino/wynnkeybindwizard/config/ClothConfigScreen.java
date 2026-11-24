@@ -226,6 +226,12 @@ public final class ClothConfigScreen {
                         Component.literal("Otherwise it is only in the All Keybinds popup."))
                 .setSaveConsumer(value -> adding.onBar = value)
                 .build());
+        page.addEntry(entries.startBooleanToggle(Component.literal("Works in inventory"), true)
+                .setDefaultValue(true)
+                .setTooltip(Component.literal("While it is on the bar, pressing its key in the inventory closes it"),
+                        Component.literal("and does what the key does in the world. Not used by item actions."))
+                .setSaveConsumer(value -> adding.worksInInventory = value)
+                .build());
 
         List<BarConfig.Entry> added = cfg.keybinds.stream().filter(entry -> !isStock(defaults, entry)).toList();
         if (added.isEmpty()) return;
@@ -238,6 +244,13 @@ public final class ClothConfigScreen {
                     .setSaveConsumer(keep -> {
                         if (!keep) removing.add(entry);
                     })
+                    .build());
+            if (entry.isItemAction()) continue;
+            page.addEntry(entries.startBooleanToggle(Component.literal("    Works in inventory"), entry.worksInInventory)
+                    .setDefaultValue(true)
+                    .setTooltip(Component.literal("While " + displayLabel(cfg, entry) + " is on the bar, pressing its key in the"),
+                            Component.literal("inventory closes it and does what the key does in the world."))
+                    .setSaveConsumer(value -> entry.worksInInventory = value)
                     .build());
         }
     }
@@ -302,6 +315,7 @@ public final class ClothConfigScreen {
         String group = DEFAULT_NEW_GROUP;
         boolean itemAction;
         boolean onBar;
+        boolean worksInInventory = true;
 
         BarConfig.Entry toEntry() {
             if (key == null || key.isEmpty() || KeyMapping.get(key) == null) return null;
@@ -309,6 +323,7 @@ public final class ClothConfigScreen {
             BarConfig.Entry entry = new BarConfig.Entry(text, group.isEmpty() ? DEFAULT_NEW_GROUP : group, key);
             if (onBar) entry.onBar();
             if (itemAction) entry.when(BarConfig.WHEN_ITEM);
+            entry.worksInInventory = worksInInventory;
             return entry;
         }
     }

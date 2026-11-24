@@ -224,6 +224,16 @@ public class InventoryBarTest implements FabricClientGameTest {
             if (!context.computeOnClient(mc -> mc.screen instanceof InventoryScreen)) {
                 throw new AssertionError("a bar key closed the inventory with keysWorkInInventory off");
             }
+            // An entry with worksInInventory off stays on the bar but its key does nothing here.
+            writeConfig("\"spellBar\": \"BOTTOM\", \"dynamic\": false", KEYBINDS.replace(
+                    "\"keys\": [\"key.keyboard.j\"], \"onBar\": true",
+                    "\"keys\": [\"key.keyboard.j\"], \"onBar\": true, \"worksInInventory\": false"));
+            openInventory(context);
+            context.getInput().pressKey(GLFW.GLFW_KEY_J);
+            context.waitTicks(5);
+            if (!context.computeOnClient(mc -> mc.screen instanceof InventoryScreen)) {
+                throw new AssertionError("a bar key with worksInInventory off closed the inventory");
+            }
             writeConfig("\"spellBar\": \"BOTTOM\", \"dynamic\": false");
             // A bar key that is also a hotbar key stays an inventory key (swap with the hovered slot).
             context.runOnClient(mc -> {
@@ -353,10 +363,14 @@ public class InventoryBarTest implements FabricClientGameTest {
     }
 
     static void writeConfig(String settings) {
+        writeConfig(settings, KEYBINDS);
+    }
+
+    static void writeConfig(String settings, String keybinds) {
         try {
             // Slot 3 is bound but left unnamed, so it must stay hidden.
             Files.writeString(CONFIG, "{\n  " + settings + ",\n  \"customCommands\": [\"Party Finder\", \"Use Menu\"],\n"
-                    + KEYBINDS + "}\n");
+                    + keybinds + "}\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

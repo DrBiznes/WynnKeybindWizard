@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Each keybind can opt out of working from the inventory with `worksInInventory: false` (default
+  on). The Add Keybind page has a **Works in inventory** switch for new keybinds and for each one
+  added before.
+
 ## 0.5.2
 
 - The keybinds on the bottom bar now work in the inventory. Pressing one closes the inventory and
