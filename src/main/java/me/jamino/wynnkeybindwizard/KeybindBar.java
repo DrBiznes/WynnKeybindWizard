@@ -161,34 +161,63 @@ public final class KeybindBar {
 
         // ---- bottom bar
         int centerX = gui.wkh$leftPos() + gui.wkh$imageWidth() / 2;
-        int wrap = Math.max(60, (int) ((screen.width - 16) / cfg.scale) - PAD_X * 2);
-        List<Row> rows = new ArrayList<>();
-        boolean spellsBelow = cfg.spellBar == BarConfig.SpellBar.BOTTOM;
-        if (spellsBelow) rows.addAll(flow(spells, wrap));
-        int fadedFrom = rows.size();
-        rows.addAll(flow(bottom, wrap));
+        List<Shown> spellsFirst = cfg.spellBar == BarConfig.SpellBar.BOTTOM ? spells : List.of();
 
         int below = gui.wkh$topPos() + gui.wkh$imageHeight() + cfg.offsetY;
         int spaceBelow = screen.height - below - SCREEN_MARGIN;
         if (spaceBelow >= KeyPromptRenderer.HEIGHT) {
-            float scale = fit(cfg.scale, height(rows), spaceBelow);
+            Layout bar = layout(spellsFirst, bottom, cfg.scale, spaceBelow, screen.width);
             // At the screen edge the bar keeps the same scale, so it still never covers the inventory.
             float top = cfg.barPosition == BarConfig.BarPosition.SCREEN_BOTTOM
-                    ? screen.height - SCREEN_MARGIN - height(rows) * scale : below;
-            drawBar(g, font, cfg, rows, fadedFrom, fade, button, buttonHovered, centerX, top, scale, true);
+                    ? screen.height - SCREEN_MARGIN - height(bar.rows) * bar.scale : below;
+            drawBar(g, font, cfg, bar.rows, bar.fadedFrom, fade, button, buttonHovered, centerX, top, bar.scale, true);
         }
 
         // ---- spell bar above the inventory
         if (cfg.spellBar == BarConfig.SpellBar.TOP && !spells.isEmpty()) {
-            List<Row> spellRows = flow(spells, wrap);
             int above = gui.wkh$topPos() - cfg.offsetY - SPELL_BAR_GAP;
             int spaceAbove = above - SCREEN_MARGIN;
             if (spaceAbove >= KeyPromptRenderer.HEIGHT) {
-                float scale = fit(cfg.scale, height(spellRows), spaceAbove);
-                float top = above - height(spellRows) * scale;
-                drawBar(g, font, cfg, spellRows, spellRows.size(), 255, null, false, centerX, top, scale, false);
+                Layout bar = layout(spells, List.of(), cfg.scale, spaceAbove, screen.width);
+                float top = above - height(bar.rows) * bar.scale;
+                drawBar(g, font, cfg, bar.rows, bar.rows.size(), 255, null, false, centerX, top, bar.scale, false);
             }
         }
+    }
+
+    /** Rows of a bar and the scale they are drawn at; rows from {@code fadedFrom} on hold the second list. */
+    private record Layout(List<Row> rows, int fadedFrom, float scale) {}
+
+    /**
+     * The largest scale, up to the configured one, at which the bar fits the free space, with its
+     * rows wrapped at that scale. Shrinking makes room for more entries per row, so a bar that
+     * would need two rows at full size may fit one row at a smaller size (or even at full size).
+     */
+    private static Layout layout(List<Shown> first, List<Shown> second, float maxScale, int space, int screenWidth) {
+        float lo = Math.min(MIN_SCALE, maxScale);
+        if (fits(first, second, maxScale, space, screenWidth)) return wrapped(first, second, maxScale, screenWidth);
+        // Still too tall at the smallest scale: draw it there anyway, as before.
+        if (!fits(first, second, lo, space, screenWidth)) return wrapped(first, second, lo, screenWidth);
+        // Fitting is monotonic in scale (smaller: fewer, shorter rows), so bisect for the largest that fits.
+        float hi = maxScale;
+        for (int i = 0; i < 12; i++) {
+            float mid = (lo + hi) / 2;
+            if (fits(first, second, mid, space, screenWidth)) lo = mid;
+            else hi = mid;
+        }
+        return wrapped(first, second, lo, screenWidth);
+    }
+
+    private static boolean fits(List<Shown> first, List<Shown> second, float scale, int space, int screenWidth) {
+        return height(wrapped(first, second, scale, screenWidth).rows) * scale <= space;
+    }
+
+    private static Layout wrapped(List<Shown> first, List<Shown> second, float scale, int screenWidth) {
+        int wrap = Math.max(60, (int) ((screenWidth - 16) / scale) - PAD_X * 2);
+        List<Row> rows = new ArrayList<>(flow(first, wrap));
+        int fadedFrom = rows.size();
+        rows.addAll(flow(second, wrap));
+        return new Layout(rows, fadedFrom, scale);
     }
 
     /**
@@ -232,11 +261,6 @@ public final class KeybindBar {
     private static boolean isIngredientPouch(ItemStack stack) {
         String name = ChatFormatting.stripFormatting(stack.getHoverName().getString());
         return name != null && name.strip().equals("Ingredient Pouch");
-    }
-
-    /** Shrinks to fit the free space next to the inventory (high GUI scales leave very little). */
-    private static float fit(float scale, int height, int space) {
-        return height * scale <= space ? scale : Math.max(MIN_SCALE, space / (float) height);
     }
 
     private static int height(List<Row> rows) {

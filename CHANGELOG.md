@@ -6,6 +6,10 @@
   does what it does in the world (Quest Book opens the quest book, a custom command runs). Keys the
   inventory uses itself (hotbar slots, drop, offhand) and the hovered item's actions are unchanged.
   The new **Bar keys work in the inventory** setting (`keysWorkInInventory`) turns this off.
+- On small screens and high GUI scales the bars shrink less. A bar that is too tall now re-wraps
+  into fewer, longer rows as it shrinks, instead of keeping the rows it had at full size. At
+  1280x720 with GUI scale 3, for example, the bottom bar is one row at 82% instead of two rows at
+  74%, and with the spells on the bottom bar it is two rows at 74% instead of three at 52%.
 
 ## 0.5.1
 
