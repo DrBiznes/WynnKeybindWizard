@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.2
 
 - The keybinds on the bottom bar now work in the inventory. Pressing one closes the inventory and
   does what it does in the world (Quest Book opens the quest book, a custom command runs). Keys the
