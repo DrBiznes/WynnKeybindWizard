@@ -16,7 +16,10 @@ their changes, as with any config a pack ships.
 ## What players see
 
 - **Bottom bar**: a short row of the most important keybinds under the inventory, ending in an
-  **All Keybinds** button.
+  **All Keybinds** button. Pressing one of those keys in the inventory closes it and does what the
+  key does in the world, so Quest Book opens the quest book. Keys the inventory uses itself (hotbar
+  slots, drop, offhand) and keys the hovered item is using stay with the inventory. Turn this off
+  with `keysWorkInInventory`.
 - **All Keybinds popup**: every configured keybind under headings. Opens from the button or its own
   rebindable key (default `Y`), over the inventory without closing it. The key only works in
   inventory screens, not in the world.
@@ -82,6 +85,7 @@ The entry is hidden while that WynnExtras feature is switched off.
 | --- | --- |
 | `enabled` | Turns the bars off without uninstalling. |
 | `showOnAllContainers` | Also show under chests, banks and other container screens, not just the inventory. |
+| `keysWorkInInventory` | Pressing a bottom bar key in the inventory closes it and does what the key does in the world (default on). Off, those keys do nothing in the inventory. |
 | `barSlots` | How many keybinds the bottom bar holds (the All Keybinds button is extra). |
 | `itemSlots` | How many item actions the bar holds while an item is hovered. |
 | `spellBar` | `TOP`, `BOTTOM` or `OFF` (popup only). |

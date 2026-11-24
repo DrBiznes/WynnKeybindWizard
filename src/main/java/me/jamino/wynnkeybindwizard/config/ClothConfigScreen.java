@@ -103,6 +103,11 @@ public final class ClothConfigScreen {
                 .setTooltip(Component.literal("Also show under banks, chests and other container screens."))
                 .setSaveConsumer(value -> cfg.showOnAllContainers = value)
                 .build());
+        general.addEntry(entries.startBooleanToggle(Component.literal("Bar keys work in the inventory"), cfg.keysWorkInInventory)
+                .setDefaultValue(defaults.keysWorkInInventory)
+                .setTooltip(Component.literal("Pressing a key from the bottom bar closes the inventory and does what it does in the world."))
+                .setSaveConsumer(value -> cfg.keysWorkInInventory = value)
+                .build());
         general.addEntry(entries.startBooleanToggle(Component.literal("Highlight held keys"), cfg.showHeldKeys)
                 .setDefaultValue(defaults.showHeldKeys)
                 .setSaveConsumer(value -> cfg.showHeldKeys = value)

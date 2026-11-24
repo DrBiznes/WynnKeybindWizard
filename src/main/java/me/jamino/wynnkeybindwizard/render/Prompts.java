@@ -92,7 +92,8 @@ public final class Prompts {
         return mapping.isUnbound() ? null : InputConstants.getKey(mapping.saveString());
     }
 
-    private static boolean isDown(InputConstants.Key key) {
+    /** Whether the physical key or mouse button is down right now. */
+    public static boolean isDown(InputConstants.Key key) {
         Window window = Minecraft.getInstance().getWindow();
         return switch (key.getType()) {
             case KEYSYM -> InputConstants.isKeyDown(window, key.getValue());

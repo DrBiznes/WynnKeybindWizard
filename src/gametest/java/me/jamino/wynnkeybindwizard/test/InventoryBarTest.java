@@ -63,6 +63,16 @@ public class InventoryBarTest implements FabricClientGameTest {
               ]
             """;
 
+    /** Set when a tick ends with jump held down: how keybinds that poll their key see a press. */
+    private static final java.util.concurrent.atomic.AtomicBoolean JUMP_SEEN_IN_TICK =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
+    static {
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (mc.options != null && mc.options.keyJump.isDown()) JUMP_SEEN_IN_TICK.set(true);
+        });
+    }
+
     private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("wynnkeybindwizard.json");
 
     @Override
@@ -183,6 +193,53 @@ public class InventoryBarTest implements FabricClientGameTest {
                 throw new AssertionError("hotkey should not open anything outside the inventory");
             }
             context.takeScreenshot("6-hotkey-in-world-does-nothing");
+
+            // A key on the bar works from the inventory: it closes, and the key does its job in the
+            // world. Quest Book's J stands in for mod keybinds here. Toggle perspective counts
+            // presses; jump checks each tick whether its key is held, the way Wynntils' keybinds do.
+            context.runOnClient(mc -> {
+                bind("key.togglePerspective", "key.keyboard.j");
+                bind("key.jump", "key.keyboard.j");
+            });
+            openInventory(context);
+            var cameraBefore = context.computeOnClient(mc -> mc.options.getCameraType());
+            JUMP_SEEN_IN_TICK.set(false);
+            context.getInput().pressKey(GLFW.GLFW_KEY_J);
+            context.waitTicks(5);
+            boolean bothDone = context.computeOnClient(mc -> mc.screen == null
+                    && mc.options.getCameraType() != cameraBefore);
+            if (!bothDone) throw new AssertionError("a bar key pressed in the inventory did not reach the world");
+            if (!JUMP_SEEN_IN_TICK.get()) {
+                throw new AssertionError("a bar key pressed in the inventory was never held down during a tick");
+            }
+            if (context.computeOnClient(mc -> mc.options.keyJump.isDown())) {
+                throw new AssertionError("the replayed key stayed held after the tap");
+            }
+            context.runOnClient(mc -> bind("key.jump", "key.keyboard.space"));
+            // With the setting off, the same key does nothing in the inventory.
+            writeConfig("\"spellBar\": \"BOTTOM\", \"dynamic\": false, \"keysWorkInInventory\": false");
+            openInventory(context);
+            context.getInput().pressKey(GLFW.GLFW_KEY_J);
+            context.waitTicks(5);
+            if (!context.computeOnClient(mc -> mc.screen instanceof InventoryScreen)) {
+                throw new AssertionError("a bar key closed the inventory with keysWorkInInventory off");
+            }
+            writeConfig("\"spellBar\": \"BOTTOM\", \"dynamic\": false");
+            // A bar key that is also a hotbar key stays an inventory key (swap with the hovered slot).
+            context.runOnClient(mc -> {
+                mc.options.setCameraType(cameraBefore);
+                bind("key.togglePerspective", "key.keyboard.f5");
+                bind("key.hotbar.9", "key.keyboard.j");
+            });
+            openInventory(context);
+            context.getInput().pressKey(GLFW.GLFW_KEY_J);
+            context.waitTicks(5);
+            if (!context.computeOnClient(mc -> mc.screen instanceof InventoryScreen)) {
+                throw new AssertionError("a bar key shared with a hotbar slot closed the inventory");
+            }
+            context.runOnClient(mc -> bind("key.hotbar.9", "key.keyboard.9"));
+            context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+            context.waitTicks(5);
 
             // The Cloth Config screen builds and opens, including the custom command and add pages.
             context.setScreen(() -> ClothConfigScreen.create(null));

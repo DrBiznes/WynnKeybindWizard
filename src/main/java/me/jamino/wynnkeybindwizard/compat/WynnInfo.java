@@ -1,5 +1,6 @@
 package me.jamino.wynnkeybindwizard.compat;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.function.Supplier;
 import me.jamino.wynnkeybindwizard.WynnKeybindWizard;
 import net.fabricmc.loader.api.FabricLoader;
@@ -42,6 +43,14 @@ public final class WynnInfo {
 
     public static ItemTraits traits(ItemStack stack) {
         return ask(() -> WynntilsCompat.traits(stack), ItemTraits.UNKNOWN);
+    }
+
+    /** Lets Wynntils act on a key that was first pressed while the inventory was open. */
+    public static void forgetScreenPress(InputConstants.Key key) {
+        ask(() -> {
+            WynntilsCompat.forgetScreenPress(key);
+            return null;
+        }, null);
     }
 
     private static <T> T ask(Supplier<T> question, T unknown) {

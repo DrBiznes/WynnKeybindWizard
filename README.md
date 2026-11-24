@@ -5,7 +5,7 @@ keybinds are. It shows the keys you have bound as live prompts around the invent
 dig through Controls to remember what `Y` does. Rebind something and the prompts update straight away.
 if you are not making a modpack Idk why you would use this!1!
 
-- **Bottom bar** with your most useful keybinds, plus an **All Keybinds** button (or press `Y`) that
+- **Bottom bar** with your most useful keybinds, which work straight from the inventory, plus an **All Keybinds** button (or press `Y`) that
   opens every keybind in a popup without closing the inventory.
 - **Spell keys** named after your current class's spells.
 - **Item actions** that change with the item you hover (compare, stat views, lock, favorite...).

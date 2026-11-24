@@ -77,6 +77,9 @@ public final class KeybindBar {
     /** Every bar drawn last frame as {x0, y0, x1, y1, scale}, in GUI coordinates (read by the layout test). */
     private static final List<float[]> DRAWN = new ArrayList<>();
 
+    /** Keys of the keybinds on the bar last frame that work from the inventory (see {@link #isBarKey}). */
+    private static final Set<InputConstants.Key> BAR_KEYS = new HashSet<>();
+
     private static List<Shown> lastItemActions = List.of();
     private static long lastItemHover;
     private static boolean showingItem;
@@ -96,6 +99,7 @@ public final class KeybindBar {
         BAR.clear();
         BUTTON.clear();
         DRAWN.clear();
+        BAR_KEYS.clear();
         if (!appliesTo(screen)) return;
 
         BarConfig cfg = BarConfig.get();
@@ -145,6 +149,11 @@ public final class KeybindBar {
         }
         int fade = (int) Math.clamp(255 * (now - shownSince) / FADE_MS, 16, 255);
 
+        // The keybinds stay pressable while the item actions are showing, except on a key the
+        // hovered item is using: there the item action wins, as the bar says.
+        for (Shown shown : main) BAR_KEYS.add(shown.key());
+        if (itemMode) for (Shown shown : lastItemActions) BAR_KEYS.remove(shown.key());
+
         Shown button = Prompts.of(Prompts.boundKey(WynnKeybindWizard.openKey()),
                 Component.translatable("wynnkeybindwizard.all_keybinds").getString(), font);
         List<Shown> bottom = new ArrayList<>(itemMode ? lastItemActions : main);
@@ -180,6 +189,14 @@ public final class KeybindBar {
                 drawBar(g, font, cfg, spellRows, spellRows.size(), 255, null, false, centerX, top, scale, false);
             }
         }
+    }
+
+    /**
+     * Whether this key belongs to one of the keybinds on the bottom bar (not a spell, not an item
+     * action), so pressing it in the inventory should do what it does in the world.
+     */
+    public static boolean isBarKey(InputConstants.Key key) {
+        return BAR_KEYS.contains(key);
     }
 
     public static List<float[]> drawnBars() {

@@ -64,6 +64,11 @@ public final class BarConfig {
     public boolean enabled = true;
     /** Also show under chests, banks and other container screens, not just the inventory. */
     public boolean showOnAllContainers = false;
+    /**
+     * Pressing a key from the bottom bar in the inventory closes it and does what the key does in
+     * the world. Off, those keys do nothing there, as in vanilla.
+     */
+    public boolean keysWorkInInventory = true;
     /** How many keybinds the bottom bar holds (the All Keybinds button is extra). */
     public int barSlots = 6;
     /** How many item actions the bottom bar holds while an item is hovered (dynamic mode). */
