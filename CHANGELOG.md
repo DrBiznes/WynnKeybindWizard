@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Compare only shows on the bar when Wynntils' compare would actually show something: armor and
+  accessories of a type you are wearing, a weapon only while you hold a weapon of that type, or
+  gear of a type you marked with Mark to Compare. It uses the new `item_comparable` condition.
+
 ## 0.5.3
 
 - Each keybind can opt out of working from the inventory with `worksInInventory: false` (default

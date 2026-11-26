@@ -36,6 +36,8 @@ public final class BarConfig {
     public static final String WHEN_ITEM = "item";
     public static final String WHEN_ITEM_STATS = "item_stats";
     public static final String WHEN_ITEM_GEAR = "item_gear";
+    /** Gear Wynntils' Compare has something to compare with right now. */
+    public static final String WHEN_ITEM_COMPARABLE = "item_comparable";
 
     public static final String GROUP_SPELLS = "Spells";
     public static final String GROUP_COMMANDS = "Commands";
@@ -132,7 +134,7 @@ public final class BarConfig {
             new Entry("Sprint", "World", "key.sprint"),
             new Entry("Sneak", "World", "key.sneak"),
 
-            new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").onBar().when(WHEN_ITEM_GEAR),
+            new Entry("Compare", "Items", "wynntils.keybind.holdToCompare").onBar().when(WHEN_ITEM_COMPARABLE),
             new Entry("Stat Ranges", "Items", "wynntils.keybind.showIdentificationRange").onBar().when(WHEN_ITEM_STATS),
             new Entry("Reroll Chance", "Items", "wynntils.keybind.showIdentificationReroll").onBar().when(WHEN_ITEM_STATS),
             // Wynntils' slot lock, else Wynncraft's own middle-click lock. One entry: they are the
@@ -155,7 +157,7 @@ public final class BarConfig {
      * keybind is missing (mod not installed) or unbound is hidden everywhere.
      *
      * <p>{@code when} is empty for "always", {@code has_mount}, or one of the item conditions
-     * ({@code item}, {@code item_stats}, {@code item_gear}); item entries with {@code onBar} are
+     * ({@code item}, {@code item_stats}, {@code item_gear}, {@code item_comparable}); item entries with {@code onBar} are
      * what the bar shows while an item is hovered. Labels {@code $spell1}..{@code $spell4} become spell names,
      * and {@code $command1}..{@code $command6} become the matching {@link #customCommands} text.
      *

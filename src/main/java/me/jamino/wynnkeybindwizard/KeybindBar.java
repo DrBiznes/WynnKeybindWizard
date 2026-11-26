@@ -251,6 +251,7 @@ public final class KeybindBar {
         return switch (when) {
             case BarConfig.WHEN_ITEM_STATS -> traits.stats();
             case BarConfig.WHEN_ITEM_GEAR -> traits.gear();
+            case BarConfig.WHEN_ITEM_COMPARABLE -> traits.comparable();
             default -> true;
         };
     }

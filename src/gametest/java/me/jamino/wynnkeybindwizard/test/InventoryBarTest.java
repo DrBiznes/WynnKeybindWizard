@@ -53,7 +53,7 @@ public class InventoryBarTest implements FabricClientGameTest {
                 {"label": "Shaders", "group": "World", "keys": ["key.keyboard.equal"]},
                 {"label": "Sprint", "group": "World", "keys": ["key.sprint"]},
                 {"label": "Sneak", "group": "World", "keys": ["key.sneak"]},
-                {"label": "Compare", "group": "Items", "keys": ["key.keyboard.keypad.enter"], "when": "item_gear"},
+                {"label": "Compare", "group": "Items", "keys": ["key.keyboard.keypad.enter"], "when": "item_comparable"},
                 {"label": "Stat Ranges", "group": "Items", "keys": ["key.keyboard.left.shift"], "when": "item_stats"},
                 {"label": "Reroll Chance", "group": "Items", "keys": ["key.keyboard.left.control"], "when": "item_stats"},
                 {"label": "Lock Slot", "group": "Items", "keys": ["key.mouse.middle"], "when": "item"},

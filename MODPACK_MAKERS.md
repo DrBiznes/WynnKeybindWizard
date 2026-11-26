@@ -104,5 +104,5 @@ The entry is hidden while that WynnExtras feature is switched off.
 | `keys` | Tried in order. A keybind id exactly as it appears after `key_` in `options.txt`, a WynnExtras setting as `wynnextras:<setting>`, or a physical key such as `key.keyboard.f3` for a fixed prompt. |
 | `group` | Heading in the popup. `Spells` is special: those entries are the spell bar. |
 | `onBar` | Candidate for the bottom bar; the first `barSlots` usable ones are shown. For item actions it means shown while hovering an item, up to `itemSlots`; unpicked ones stay in the popup. |
-| `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`) which makes it an item action. |
+| `when` | Empty for always, `has_mount`, or an item condition (`item`, `item_stats`, `item_gear`, `item_comparable`) which makes it an item action. `item_comparable` is gear Wynntils' Compare can match right now: armor or accessories of a type you are wearing, a weapon of the type in your hand, or anything of a type you marked for comparing. |
 | `worksInInventory` | Default `true`. `false` keeps this keybind's key from closing the inventory and acting in the world while it is on the bottom bar; it is still shown. Has no effect on spells and item actions, or when `keysWorkInInventory` is off. |

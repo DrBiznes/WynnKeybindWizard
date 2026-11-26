@@ -11,12 +11,16 @@ import net.minecraft.world.item.ItemStack;
  * gets its "don't know" answer, which is always the one that hides nothing.
  */
 public final class WynnInfo {
-    /** What Wynntils can do with a hovered item. */
-    public record ItemTraits(boolean stats, boolean gear) {
+    /**
+     * What Wynntils can do with a hovered item. {@code gear} is any weapon, armor or accessory;
+     * {@code comparable} is gear that Compare would show something for right now (a matching
+     * piece worn or held, or marked for comparing).
+     */
+    public record ItemTraits(boolean stats, boolean gear, boolean comparable) {
         /** Not a recognised Wynncraft item: no stat views, nothing to compare. */
-        static final ItemTraits PLAIN = new ItemTraits(false, false);
+        static final ItemTraits PLAIN = new ItemTraits(false, false, false);
         /** Wynntils unavailable: show every item action rather than guess. */
-        static final ItemTraits UNKNOWN = new ItemTraits(true, true);
+        static final ItemTraits UNKNOWN = new ItemTraits(true, true, true);
     }
 
     private static boolean available = FabricLoader.getInstance().isModLoaded("wynntils");
